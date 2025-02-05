@@ -21,8 +21,8 @@ jobs:
       - name: Set up working directory and run Make commands
         run: |
           chmod +x app/gradlew 
-          cd $GITHUB_WORKSPACE/app
-          chmod +x ./gradlew  # Добавляем разрешения на выполнение
+          #cd $GITHUB_WORKSPACE/app
+          #chmod +x ./gradlew  # Добавляем разрешения на выполнение
           make setup
           make clean
           make build
@@ -32,7 +32,7 @@ jobs:
 
       - name: Build and generate code coverage report
         run: |
-          cd $GITHUB_WORKSPACE/app
+          #cd $GITHUB_WORKSPACE/app
           make report
           
       - name: Publish code coverage
