@@ -21,6 +21,7 @@ jobs:
       - name: Set up working directory and run Make commands
         run: |
           cd $GITHUB_WORKSPACE/app
+          chmod +x app/gradlew 
           chmod +x ./gradlew  # Добавляем разрешения на выполнение
           make setup
           make clean
