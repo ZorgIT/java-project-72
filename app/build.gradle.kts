@@ -40,44 +40,35 @@ dependencies {
 
 // Конфигурация Jacoco
 jacoco {
-    toolVersion = "0.8.11"  // Используем корректный синтаксис
+    toolVersion = "0.8.11"
     reportsDirectory.set(layout.buildDirectory.dir("reports/jacoco"))
 }
 
-// Настройка задачи генерации отчета Jacoco
-tasks.withType<JacocoReport> {  // Используем правильный тип задачи
+// Настройка задачи генерации отчёта Jacoco
+tasks.withType<JacocoReport> {
+    dependsOn(tasks.test)  // Зависимость от задачи test
     reports {
         xml.required.set(true)
         html.required.set(true)
     }
 
-    // Корректное указание classDirectories
     classDirectories.setFrom(
         files(classDirectories.files.map {
             fileTree(it) {
-                exclude("**/*Test.class")
+                exclude(
+                    "**/*Test.class",
+                    "**/Main.class"  // Пример: исключение главного класса, если нужно
+                )
             }
         })
     )
 }
 
-tasks.jacocoTestReport {
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-    }
-    classDirectories.setFrom(
-        files(classDirectories.files.map {
-            fileTree(it).apply {
-                exclude("**/*Test.class")
-            }
-        })
-    )
-}
-
+// Настройка задачи test
 tasks.test {
     useJUnitPlatform()
-    // https://technology.lastminute.com/junit5-kotlin-and-gradle-dsl/
+    finalizedBy(tasks.jacocoTestReport)  // Запуск jacocoTestReport после test
+
     testLogging {
         exceptionFormat = TestExceptionFormat.FULL
         events = mutableSetOf(
@@ -85,8 +76,6 @@ tasks.test {
             TestLogEvent.PASSED,
             TestLogEvent.SKIPPED
         )
-        // showStackTraces = true
-        // showCauses = true
         showStandardStreams = true
     }
 }

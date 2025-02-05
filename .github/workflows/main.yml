@@ -30,7 +30,7 @@ jobs:
           make lint
           make build
 
-      - name: Build and generate code coverage report
+      - name: Generate coverage report
         run: |
           #cd $GITHUB_WORKSPACE/app
           make report
@@ -39,8 +39,9 @@ jobs:
         uses: paambaati/codeclimate-action@v5.0.0
         env:
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
-          JACOCO_SOURCE_PATH: app/src/main/java
+          JACOCO_SOURCE_PATH: app/src/main/java  # Путь к исходникам
         with:
-          coverageCommand: ""
-          coverageLocations: ${{github.workspace}}/app/build/reports/jacoco/xml/jacocoTestReport.xml:jacoco
-#          coverageInputType: jacoco
+          coverageCommand: make report  # Явно указываем команду для генерации отчета
+          coverageLocations: ${{ github.workspace }}/app/build/reports/jacoco/test/jacocoTestReport.xml:jacoco
+          coverageInputType: jacoco
+          debug: true
