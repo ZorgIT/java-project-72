@@ -57,11 +57,13 @@ tasks.withType<JacocoReport> {
             fileTree(it) {
                 exclude(
                     "**/*Test.class",
-                    "**/Main.class"  // Пример: исключение главного класса, если нужно
+                    //"**/Main.class" Пример: исключение главного класса,
+                // если нужно
                 )
             }
         })
     )
+    sourceDirectories.setFrom(files("$projectDir/src/main/java"))
 }
 
 // Настройка задачи test

@@ -23,12 +23,12 @@ jobs:
           chmod +x app/gradlew 
           #cd $GITHUB_WORKSPACE/app
           #chmod +x ./gradlew  # Добавляем разрешения на выполнение
-          make setup
           make clean
+          make setup
           make build
+          make test
           make install
           make lint
-          make build
 
       - name: Generate coverage report
         run: |
@@ -44,10 +44,10 @@ jobs:
       - name: Publish code coverage
         uses: paambaati/codeclimate-action@v5.0.0
         env:
-          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
-          JACOCO_SOURCE_PATH: app/src/main/java  # Путь к исходникам
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+          JACOCO_SOURCE_PATH: ${{ github.workspace }}/app/src/main/java
         with:
-          coverageCommand: make report  # Явно указываем команду для генерации отчета
-          coverageLocations: ${{ github.workspace }}/app/build/reports/jacoco/test/jacocoTestReport.xml:jacoco
-          coverageInputType: jacoco
+          coverageLocations: |
+          ${{ github.workspace }}/app/build/reports/jacoco/test/jacocoTestReport.xml:jacoco
+          prefix: ${{ github.workspace }}  # Добавьте этот параметр
           debug: true
