@@ -1,35 +1,38 @@
 .DEFAULT_GOAL := build-run
 .PHONY: build setup clean install run run-dist test lint check-deps report
 
+# Пути относительно корня проекта
+GRADLE_CMD := ./app/gradlew
+APP_DIR := app
+
 setup:
-	./gradlew wrapper --gradle-version 8.8
+	$(GRADLE_CMD) wrapper --gradle-version 8.8
 
 clean:
-	./gradlew clean
+	$(GRADLE_CMD) clean
 
 build:
-	./gradlew clean build --stacktrace
+	$(GRADLE_CMD) clean build --stacktrace
 
 install:
-	./gradlew clean install
+	$(GRADLE_CMD) clean  installShadowDist
 
 run-dist:
-	./build/install/app/bin/app
+	$(APP_DIR)/build/install/app/bin/app
 
 run:
-	./gradlew run
+	$(GRADLE_CMD) run
 
 test:
-	./gradlew jacocoTestReport
+	$(GRADLE_CMD) jacocoTestReport
 
 lint:
-	./gradlew checkstyleMain
+	$(GRADLE_CMD) checkstyleMain
 
 check-deps:
-	./gradlew dependencyUpdates -Drevision=release
+	$(GRADLE_CMD) dependencyUpdates -Drevision=release
 
 report:
-	./gradlew jacocoTestReport
-
+	$(GRADLE_CMD) jacocoTestReport
 
 build-run: build run

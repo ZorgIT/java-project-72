@@ -15,7 +15,7 @@ build:
 	$(GRADLE_CMD) clean build --stacktrace
 
 install:
-	$(GRADLE_CMD) clean installDist
+	$(GRADLE_CMD) clean  installShadowDist
 
 run-dist:
 	$(APP_DIR)/build/install/app/bin/app
