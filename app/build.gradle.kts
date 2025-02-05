@@ -5,13 +5,14 @@ plugins {
     application
     checkstyle
     jacoco
-    id("io.freefair.lombok") version "8.6"
+    id("io.freefair.lombok") version "8.12.1"
     id("com.github.ben-manes.versions") version "0.51.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 application {
     mainClass.set("hexlet.code.Main")
+    applicationName = "app"
 }
 
 group = "hexlet.code"
