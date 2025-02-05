@@ -48,6 +48,6 @@ jobs:
           JACOCO_SOURCE_PATH: ${{ github.workspace }}/app/src/main/java
         with:
           coverageLocations: |
-          ${{ github.workspace }}/app/build/reports/jacoco/test/jacocoTestReport.xml:jacoco
+            ${{ github.workspace }}/app/build/reports/jacoco/test/jacocoTestReport.xml:jacoco
           prefix: ${{ github.workspace }}  # Добавьте этот параметр
           debug: true
