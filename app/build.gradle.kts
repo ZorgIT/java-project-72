@@ -4,6 +4,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 plugins {
     application
     checkstyle
+    jacoco
     id("io.freefair.lombok") version "8.6"
     id("com.github.ben-manes.versions") version "0.51.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
@@ -36,12 +37,53 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
+// Конфигурация Jacoco
+jacoco {
+    toolVersion = "0.8.11"  // Используем корректный синтаксис
+    reportsDirectory.set(layout.buildDirectory.dir("reports/jacoco"))
+}
+
+// Настройка задачи генерации отчета Jacoco
+tasks.withType<JacocoReport> {  // Используем правильный тип задачи
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    // Корректное указание classDirectories
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude("**/*Test.class")
+            }
+        })
+    )
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it).apply {
+                exclude("**/*Test.class")
+            }
+        })
+    )
+}
+
 tasks.test {
     useJUnitPlatform()
     // https://technology.lastminute.com/junit5-kotlin-and-gradle-dsl/
     testLogging {
         exceptionFormat = TestExceptionFormat.FULL
-        events = mutableSetOf(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
+        events = mutableSetOf(
+            TestLogEvent.FAILED,
+            TestLogEvent.PASSED,
+            TestLogEvent.SKIPPED
+        )
         // showStackTraces = true
         // showCauses = true
         showStandardStreams = true
