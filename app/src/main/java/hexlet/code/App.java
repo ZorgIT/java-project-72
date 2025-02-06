@@ -2,8 +2,12 @@ package hexlet.code;
 
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class App {
+    private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+
     public static void main(String[] args) {
         var app = getApp();
         app.start(getPort());
@@ -20,7 +24,11 @@ public class App {
             config.fileRenderer(new JavalinJte());
         });
 
-        app.get("/", ctx -> ctx.result("All works fine"));
+        app.get("/", ctx -> {
+            LOGGER.info("Received request to root ®");
+            ctx.result("All works fine");
+
+        });
 
 
         return app;
