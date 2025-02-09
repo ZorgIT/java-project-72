@@ -42,8 +42,8 @@ public class App {
 
         app.get("/testdb", ctx -> {
             try (Connection connection = Database.getDataSource().getConnection()) {
-                PreparedStatement stmt = connection.prepareStatement
-                ("SELECT * FROM users");
+                PreparedStatement stmt = connection
+                        .prepareStatement("SELECT * FROM users");
                 ResultSet rs = stmt.executeQuery();
 
                 // Обработка результата и вывод данных клиенту
@@ -55,12 +55,11 @@ public class App {
                     sb.append(rs.getString("created_at")).append("\n");
                 }
 
-                ctx.result(sb.toString() + "\n" + "Запрос выполнен " +
-                        "успешно//bd " +
-                        "connection ok");
+                ctx.result(sb.toString() + "\n" + "Запрос выполнен "
+                        + "успешно//bd connection ok");
             } catch (Exception e) {
-                ctx.status(500).result("Ошибка при работе с базой " +
-                        "данных//DB error");
+                ctx.status(500).result("Ошибка при работе с базой "
+                        + "данных//DB error");
             }
         });
 

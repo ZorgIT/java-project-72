@@ -2,31 +2,42 @@ package hexlet.code;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import io.github.cdimascio.dotenv.Dotenv;
 
 import javax.sql.DataSource;
+import java.util.Optional;
 
 public class Database {
     private static final HikariDataSource DATA_SOURCE;
 
     static {
+        Dotenv dotenv = Dotenv.load();
+        //Get config from system if not exist go to .env
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(System.getenv().getOrDefault("JDBC_DATABASE_URL",
-                "jdbc:postgresql://dpg-cuihqe52ng1s73dk69qg-a.frankfurt-postgres.render.com:5432/hexlet_hw_db"));
-        config.setUsername(System.getenv().getOrDefault("DB_USERNAME", "user"));
-        config.setPassword(System.getenv().getOrDefault("DB_PASSWORD", "pass"));
+        String jdbcUrl = Optional.ofNullable(System.getenv("JDBC_DATABASE_URL"))
+                .filter(s -> !s.isEmpty())
+                .orElse(dotenv.get("JDBC_DATABASE_URL", ""));
+        config.setJdbcUrl(jdbcUrl);
 
+        String username = Optional.ofNullable(System.getenv(
+                        "DB_USERNAME"))
+                .filter(s -> !s.isEmpty())
+                .orElse(dotenv.get("DB_USERNAME", ""));
+        config.setUsername(username);
 
-        //TODO убрать временные пароли на ENV файл
+        String password = Optional.ofNullable(System.getenv(
+                        "DB_PASSWORD"))
+                .filter(s -> !s.isEmpty())
+                .orElse(dotenv.get("DB_PASSWORD", ""));
+        config.setPassword(password);
 
-        //
-        // При необходимости можно задать драйвер явно
+        // set driver manually
         config.setDriverClassName("org.postgresql.Driver");
 
-        // Дополнительные параметры пула:
+        // Pull parameter
         config.setMaximumPoolSize(10); // максимальное число соединений
         config.setMinimumIdle(2);      // минимальное число "живых" соединений
 
-        // Создаем DataSource на основе конфигурации
         DATA_SOURCE = new HikariDataSource(config);
     }
 
