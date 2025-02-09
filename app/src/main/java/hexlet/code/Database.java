@@ -11,16 +11,16 @@ public class Database {
     static {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(System.getenv().getOrDefault("JDBC_DATABASE_URL",
-                "postgresql://hexlet_hw_db_user:6j9wmHlipr6ahtOM1N"
-                        + "2Ft0wSK4h975w4@dpg-cuihqe52ng1s73dk69q"
-                        + "g-a.frankfurt"
-                        + "-postgres.render.com/hexlet_hw_db"));
-        config.setUsername(System.getenv().getOrDefault("USERNAME", "user"));
-        config.setPassword(System.getenv().getOrDefault("PASSWORD", "pass"));
+                "jdbc:postgresql://dpg-cuihqe52ng1s73dk69qg-a.frankfurt-postgres.render.com:5432/hexlet_hw_db"));
+        config.setUsername(System.getenv().getOrDefault("DB_USERNAME", "user"));
+        config.setPassword(System.getenv().getOrDefault("DB_PASSWORD", "pass"));
+
+
+        //TODO убрать временные пароли на ENV файл
 
         //
         // При необходимости можно задать драйвер явно
-        // config.setDriverClassName("org.postgresql.Driver");
+        config.setDriverClassName("org.postgresql.Driver");
 
         // Дополнительные параметры пула:
         config.setMaximumPoolSize(10); // максимальное число соединений

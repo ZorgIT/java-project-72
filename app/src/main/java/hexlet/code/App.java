@@ -6,13 +6,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class App {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
 
     public static void main(String[] args) {
         var app = getApp();
-
         // Регистрируем shutdown hook для закрытия DataSource
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Закрытие пула соединений...");
@@ -41,17 +42,25 @@ public class App {
 
         app.get("/testdb", ctx -> {
             try (Connection connection = Database.getDataSource().getConnection()) {
-                // Пример выполнения запроса
-                //PreparedStatement stmt = connection.prepareStatement
-                // ("SELECT * FROM users");
-                //ResultSet rs = stmt.executeQuery();
+                PreparedStatement stmt = connection.prepareStatement
+                ("SELECT * FROM users");
+                ResultSet rs = stmt.executeQuery();
 
                 // Обработка результата и вывод данных клиенту
                 // ...
+                StringBuilder sb = new StringBuilder();
+                while (rs.next()) {
+                    sb.append(rs.getString("username")).append("\n");
+                    sb.append(rs.getString("email")).append("\n");
+                    sb.append(rs.getString("created_at")).append("\n");
+                }
 
-                ctx.result("Запрос выполнен успешно");
+                ctx.result(sb.toString() + "\n" + "Запрос выполнен " +
+                        "успешно//bd " +
+                        "connection ok");
             } catch (Exception e) {
-                ctx.status(500).result("Ошибка при работе с базой данных");
+                ctx.status(500).result("Ошибка при работе с базой " +
+                        "данных//DB error");
             }
         });
 
