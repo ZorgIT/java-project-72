@@ -49,5 +49,5 @@ jobs:
         with:
           coverageLocations: |
             ${{ github.workspace }}/app/build/reports/jacoco/test/jacocoTestReport.xml:jacoco
-          prefix: ${{ github.workspace }}  # Добавьте этот параметр
+          prefix: ${{ github.workspace }} 
           debug: true
