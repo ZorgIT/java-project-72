@@ -24,8 +24,9 @@ public class Database {
                 .filter(s -> !s.isEmpty())
                 .orElse(dotenv.get("JDBC_DATABASE_URL", "jdbc:h2:mem:project;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"));
         if (jdbcUrl.isEmpty()) {
-            throw new IllegalStateException("JDBC_DATABASE_URL не задан. " +
-                    "Укажите необходимые параметры подключения в системных переменных или в файле .env.");
+            throw new IllegalStateException("JDBC_DATABASE_URL не задан. "
+                    + "Укажите необходимые параметры подключения в системных "
+                    + "переменных или в файле .env.");
         }
         config.setJdbcUrl(jdbcUrl);
 

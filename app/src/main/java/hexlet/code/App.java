@@ -57,10 +57,8 @@ public class App {
                 newUrl = new Url("https://newsite2.com", LocalDateTime.now());
                 URL_REPOSITORY.save(newUrl);
 
-                ctx.result( URL_REPOSITORY.findAll().toString() + "\n"+
-                        "Запрос " +
-                        "выполнен "
-                        + "успешно//bd connection ok");
+                ctx.result(URL_REPOSITORY.findAll().toString()
+                        + "\n Запрос выполнен успешно//bd connection ok");
             } catch (Exception e) {
                 ctx.status(500).result("Ошибка при работе с базой "
                         + "данных//DB error");

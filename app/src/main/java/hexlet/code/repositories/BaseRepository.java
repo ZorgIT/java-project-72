@@ -5,7 +5,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public abstract class BaseRepository {
-        protected final DataSource dataSource;
+    protected final DataSource dataSource;
 
     public BaseRepository(DataSource dataSource) {
         this.dataSource = dataSource;
