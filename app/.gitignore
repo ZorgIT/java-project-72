@@ -1,5 +1,5 @@
 .gradle
-.env
+src/test/.env
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
