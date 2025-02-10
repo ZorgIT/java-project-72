@@ -1,5 +1,7 @@
 package hexlet.code;
 
+import hexlet.code.models.Url;
+import hexlet.code.repositories.UrlRepository;
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
 import org.slf4j.Logger;
@@ -8,18 +10,20 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDateTime;
 
 public class App {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+    private static final UrlRepository URL_REPOSITORY = new UrlRepository(Database.getDataSource());
 
     public static void main(String[] args) {
         var app = getApp();
+        URL_REPOSITORY.createTable();
         // Регистрируем shutdown hook для закрытия DataSource
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Закрытие пула соединений...");
             Database.closeDataSource();
         }));
-
         app.start(getPort());
     }
 
@@ -43,24 +47,26 @@ public class App {
         app.get("/testdb", ctx -> {
             try (Connection connection = Database.getDataSource().getConnection()) {
                 PreparedStatement stmt = connection
-                        .prepareStatement("SELECT * FROM users");
+                        .prepareStatement("SELECT * FROM urls");
                 ResultSet rs = stmt.executeQuery();
 
                 // Обработка результата и вывод данных клиенту
-                // ...
-                StringBuilder sb = new StringBuilder();
-                while (rs.next()) {
-                    sb.append(rs.getString("username")).append("\n");
-                    sb.append(rs.getString("email")).append("\n");
-                    sb.append(rs.getString("created_at")).append("\n");
-                }
 
-                ctx.result(sb.toString() + "\n" + "Запрос выполнен "
+                Url newUrl = new Url("https://newsite.com", LocalDateTime.now());
+                URL_REPOSITORY.save(newUrl);
+                newUrl = new Url("https://newsite2.com", LocalDateTime.now());
+                URL_REPOSITORY.save(newUrl);
+
+                ctx.result( URL_REPOSITORY.findAll().toString() + "\n"+
+                        "Запрос " +
+                        "выполнен "
                         + "успешно//bd connection ok");
             } catch (Exception e) {
                 ctx.status(500).result("Ошибка при работе с базой "
                         + "данных//DB error");
             }
+
+
         });
 
 

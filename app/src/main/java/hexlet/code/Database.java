@@ -19,13 +19,13 @@ public class Database {
         HikariConfig config = new HikariConfig();
 
         // Получаем JDBC URL из системных переменных или из .env
+        // если коннект к бд отсуствует, подключиться к локальной бд
         String jdbcUrl = Optional.ofNullable(System.getenv("JDBC_DATABASE_URL"))
                 .filter(s -> !s.isEmpty())
-                .orElse(dotenv.get("JDBC_DATABASE_URL", ""));
+                .orElse(dotenv.get("JDBC_DATABASE_URL", "jdbc:h2:mem:project;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"));
         if (jdbcUrl.isEmpty()) {
-            throw new IllegalStateException("JDBC_DATABASE_URL не задан. "
-                    + "Укажите необходимые параметры подключения в системных "
-                    + "переменных или в файле .env.");
+            throw new IllegalStateException("JDBC_DATABASE_URL не задан. " +
+                    "Укажите необходимые параметры подключения в системных переменных или в файле .env.");
         }
         config.setJdbcUrl(jdbcUrl);
 
@@ -51,7 +51,13 @@ public class Database {
         config.setPassword(password);
 
         // Устанавливаем драйвер PostgreSQL
-        config.setDriverClassName("org.postgresql.Driver");
+        if (jdbcUrl.startsWith("jdbc:h2:")) {
+            config.setDriverClassName("org.h2.Driver");
+        } else if (jdbcUrl.startsWith("jdbc:postgresql:")) {
+            config.setDriverClassName("org.postgresql.Driver");
+        } else {
+            throw new IllegalArgumentException("Неизвестный тип JDBC URL: " + jdbcUrl);
+        }
 
         // Настройки пула соединений
         config.setMaximumPoolSize(10); // максимальное число соединений
