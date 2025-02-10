@@ -1,16 +1,20 @@
 package hexlet.code;
 
+import gg.jte.ContentType;
+import gg.jte.TemplateEngine;
+import gg.jte.resolve.ResourceCodeResolver;
+import hexlet.code.dto.MainPage;
 import hexlet.code.models.Url;
 import hexlet.code.repositories.UrlRepository;
+import hexlet.code.util.NamedRoutes;
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.time.LocalDateTime;
+
+import static io.javalin.rendering.template.TemplateUtil.model;
 
 public class App {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
@@ -21,10 +25,16 @@ public class App {
         URL_REPOSITORY.createTable();
         // Регистрируем shutdown hook для закрытия DataSource
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("Закрытие пула соединений...");
+            LOGGER.info("Закрытие пула соединений...//close connection pull");
             Database.closeDataSource();
         }));
         app.start(getPort());
+    }
+
+    private static TemplateEngine createTemplateEngine() {
+        ClassLoader classLoader = App.class.getClassLoader();
+        ResourceCodeResolver codeResolver = new ResourceCodeResolver("templates", classLoader);
+        return TemplateEngine.create(codeResolver, ContentType.Html);
     }
 
     private static int getPort() {
@@ -35,21 +45,24 @@ public class App {
     public static Javalin getApp() {
         var app = Javalin.create(config -> {
             config.bundledPlugins.enableDevLogging();
-            config.fileRenderer(new JavalinJte());
+            config.fileRenderer(new JavalinJte(createTemplateEngine()));
         });
 
         app.get("/", ctx -> {
             LOGGER.info("Received request to root ®");
-            ctx.result("All works fine");
-
+            var visited = Boolean.valueOf(ctx.cookie("visited"));
+            var page = new MainPage("Домашняя страница", visited, "");
+            ctx.render("index.jte", model(
+                    "page", page,
+                    "content", "",
+                    "footer", null,
+                    "ctx", ctx
+            ));
+            ctx.cookie("visited", String.valueOf(true));
         });
 
-        app.get("/testdb", ctx -> {
-            try (Connection connection = Database.getDataSource().getConnection()) {
-                PreparedStatement stmt = connection
-                        .prepareStatement("SELECT * FROM urls");
-                ResultSet rs = stmt.executeQuery();
-
+        app.get(NamedRoutes.testdbPath(), ctx -> {
+            try {
                 // Обработка результата и вывод данных клиенту
 
                 Url newUrl = new Url("https://newsite.com", LocalDateTime.now());
@@ -63,7 +76,6 @@ public class App {
                 ctx.status(500).result("Ошибка при работе с базой "
                         + "данных//DB error");
             }
-
 
         });
 
