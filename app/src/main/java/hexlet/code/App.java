@@ -3,6 +3,7 @@ package hexlet.code;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
+import hexlet.code.controllers.UrlController;
 import hexlet.code.dto.MainPage;
 import hexlet.code.models.Url;
 import hexlet.code.repositories.UrlRepository;
@@ -61,6 +62,11 @@ public class App {
             ctx.cookie("visited", String.valueOf(true));
         });
 
+        app.get(NamedRoutes.urlsPath(), UrlController::index);
+        app.post(NamedRoutes.urlsPath(),UrlController::create);
+
+
+        //TODO удалить тестовый маршрут.
         app.get(NamedRoutes.testdbPath(), ctx -> {
             try {
                 // Обработка результата и вывод данных клиенту

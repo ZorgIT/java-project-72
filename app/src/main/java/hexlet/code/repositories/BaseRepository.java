@@ -5,13 +5,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public abstract class BaseRepository {
-    protected final DataSource dataSource;
+    public static DataSource dataSource;
 
     public BaseRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
-    protected Connection getConnection() throws SQLException {
+    public static Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
 }

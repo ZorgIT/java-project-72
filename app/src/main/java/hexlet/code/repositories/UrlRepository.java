@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.ResultSet;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class UrlRepository extends BaseRepository {
              PreparedStatement stmt = connection.prepareStatement(
                      "CREATE TABLE IF NOT EXISTS urls ("
                              + "id BIGSERIAL PRIMARY KEY, "
-                             + "name VARCHAR(255) NOT NULL, "
+                             + "name VARCHAR(255) NOT NULL UNIQUE, "
                              + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
              )) {
             stmt.executeUpdate();
@@ -33,14 +34,14 @@ public class UrlRepository extends BaseRepository {
         }
     }
 
-    public void save(Url url) {
+    public static void save(Url url) {
         try (Connection connection = getConnection();
              PreparedStatement stmt = connection.prepareStatement(
                      "INSERT INTO urls (name, created_at) VALUES (?, ?)",
                      Statement.RETURN_GENERATED_KEYS
              )) {
             stmt.setString(1, url.getName());
-            stmt.setTimestamp(2, Timestamp.valueOf(url.getCreatedAt()));
+            stmt.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
             stmt.executeUpdate();
 
             // Получаем сгенерированный идентификатор
@@ -54,7 +55,7 @@ public class UrlRepository extends BaseRepository {
         }
     }
 
-    public List<Url> findAll() {
+    public static List<Url> findAll() {
         List<Url> urls = new ArrayList<>();
         try (Connection connection = getConnection();
              PreparedStatement stmt = connection.prepareStatement("SELECT * FROM urls")) {

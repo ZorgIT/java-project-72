@@ -18,6 +18,21 @@
           integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
           crossorigin="anonymous">
     <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .content-wrapper {
+            flex: 1;
+        }
+
+        @supports not (min-height: 100dvh) {
+            html { height: 100%; }
+            body { min-height: 100%; }
+        }
+
         .--brisk-axd {
             filter: blur(4px);
             user-select: none;
@@ -45,24 +60,26 @@
         </div>
     </div>
 </nav>
-<main>
+<main class="content-wrapper">
     @if(page instanceof hexlet.code.dto.MainPage && !((hexlet.code.dto.MainPage) page).isVisited())
         <h1>Привет, c Хекслет!</h1>
-        Это сообщение показывается только один раз. Тест куки.
+        <p>Это сообщение показывается только один раз. Тест куки.</p>
     @endif
     @if(page != null && page.getFlash() != null)
         <p>${page.getFlash()}</p>
     @endif
+    <div class="content">
+        ${content}
+    </div>
 </main>
-<div class="content">
-    ${content}
-</div>
+
+
 @if (footer != null)
     <div class="footer">
         ${footer}
     </div>
 @else
-    <footer class="footer border-top py-3 mt-5 bg-light">
+    <footer class="footer border-top py-3 bg-light"> <!-- Убрали mt-5 -->
         <div class="container-xl">
             <div class="text-center">
                 created by
@@ -71,7 +88,12 @@
         </div>
     </footer>
 @endif
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
+        integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
+        crossorigin="anonymous"></script>
 </body>
 </html>
