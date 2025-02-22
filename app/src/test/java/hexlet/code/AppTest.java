@@ -24,10 +24,12 @@ public class AppTest {
         // Создаем таблицу перед каждым тестом
         try (Connection connection = Database.getDataSource().getConnection();
              Statement stmt = connection.createStatement()) {
-            stmt.execute("CREATE TABLE IF NOT EXISTS urls ("
+            stmt.execute(                     "CREATE TABLE IF NOT EXISTS urls ("
                     + "id BIGSERIAL PRIMARY KEY, "
                     + "name VARCHAR(255) NOT NULL UNIQUE, "
-                    + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+                    + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+                    + "checked_at DATE DEFAULT NULL,"
+                    + "response_code VARCHAR(255) NULL UNIQUE)");
         }
 
         UrlRepository.removeAll(); // Очищаем таблицу
