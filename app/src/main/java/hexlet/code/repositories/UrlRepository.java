@@ -91,4 +91,16 @@ public class UrlRepository extends BaseRepository {
         }
         return urls;
     }
+
+    public static void removeAll() throws SQLException {
+        try (Connection connection = getConnection();
+             Statement stmt = connection.createStatement()) {
+            stmt.execute("TRUNCATE TABLE urls RESTART IDENTITY");
+        } catch (SQLException e) {
+            // Игнорируем ошибку если таблицы нет
+            if (!e.getMessage().contains("Table \"URLS\" not found")) {
+                throw e;
+            }
+        }
+    }
 }

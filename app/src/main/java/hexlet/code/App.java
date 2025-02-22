@@ -5,15 +5,12 @@ import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
 import hexlet.code.controllers.UrlController;
 import hexlet.code.dto.MainPage;
-import hexlet.code.models.Url;
 import hexlet.code.repositories.UrlRepository;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.time.LocalDateTime;
 
 import static io.javalin.rendering.template.TemplateUtil.model;
 
@@ -65,27 +62,6 @@ public class App {
         app.get(NamedRoutes.urlsPath(), UrlController::index);
         app.get(NamedRoutes.urlsPath("{id}"), UrlController::show);
         app.post(NamedRoutes.urlsPath(), UrlController::create);
-
-
-        //TODO удалить тестовый маршрут.
-        app.get(NamedRoutes.testdbPath(), ctx -> {
-            try {
-                // Обработка результата и вывод данных клиенту
-
-                Url newUrl = new Url("https://newsite.com", LocalDateTime.now());
-                URL_REPOSITORY.save(newUrl);
-                newUrl = new Url("https://newsite2.com", LocalDateTime.now());
-                URL_REPOSITORY.save(newUrl);
-
-                ctx.result(URL_REPOSITORY.findAll().toString()
-                        + "\n Запрос выполнен успешно//bd connection ok");
-            } catch (Exception e) {
-                ctx.status(500).result("Ошибка при работе с базой "
-                        + "данных//DB error");
-            }
-
-        });
-
 
         return app;
     }

@@ -11,58 +11,77 @@ public class Database {
     private static final HikariDataSource DATA_SOURCE;
 
     static {
-        // Конфигурируем dotenv так, чтобы игнорировать отсутствие файла .env
+        boolean isTest = "test".equals(System.getProperty("env"));
         Dotenv dotenv = Dotenv.configure()
+                .directory(isTest ? "src/test/resources" : ".")
                 .ignoreIfMissing()
                 .load();
 
         HikariConfig config = new HikariConfig();
 
-        // Получаем JDBC URL из системных переменных или из .env
-        // если коннект к бд отсуствует, подключиться к локальной бд
         String jdbcUrl = Optional.ofNullable(System.getenv("JDBC_DATABASE_URL"))
                 .filter(s -> !s.isEmpty())
                 .orElse(dotenv.get("JDBC_DATABASE_URL", "jdbc:h2:mem:project;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"));
+
+        // Для H2 разрешаем URL без явного указания в переменных окружения
         if (jdbcUrl.isEmpty()) {
-            throw new IllegalStateException("JDBC_DATABASE_URL не задан. "
-                    + "Укажите необходимые параметры подключения в системных "
-                    + "переменных или в файле .env.");
+            // Для тестов используем отдельную in-memory базу
+            jdbcUrl = "jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false";
         }
         config.setJdbcUrl(jdbcUrl);
 
-        // Получаем имя пользователя
+        boolean isH2 = jdbcUrl.startsWith("jdbc:h2:");
+
+        // Настройки для H2
+        String defaultH2User = "sa";
+        String defaultH2Password = "";
+
+        // Получаем имя пользователя с учетом типа БД
         String username = Optional.ofNullable(System.getenv("DB_USERNAME"))
                 .filter(s -> !s.isEmpty())
-                .orElse(dotenv.get("DB_USERNAME", ""));
-        if (username.isEmpty()) {
-            throw new IllegalStateException("DB_USERNAME не задан. "
-                    + "Укажите имя пользователя для подключения к базе данных"
-                    + ".");
-        }
-        config.setUsername(username);
+                .orElseGet(() -> dotenv.get("DB_USERNAME", isH2 ? defaultH2User : ""));
 
-        // Получаем пароль
+        // Для H2 используем дефолтные значения, если не указаны
+        if (username.isEmpty() && isH2) {
+            username = defaultH2User;
+        }
+
+        // Получаем пароль с учетом типа БД
         String password = Optional.ofNullable(System.getenv("DB_PASSWORD"))
                 .filter(s -> !s.isEmpty())
-                .orElse(dotenv.get("DB_PASSWORD", ""));
-        if (password.isEmpty()) {
-            throw new IllegalStateException("DB_PASSWORD не задан. "
-                    + "Укажите пароль для подключения к базе данных.");
+                .orElseGet(() -> dotenv.get("DB_PASSWORD", isH2 ? defaultH2Password : ""));
+
+        // Проверяем учетные данные только для PostgreSQL
+        if (!isH2) {
+            if (username.isEmpty()) {
+                throw new IllegalStateException("DB_USERNAME не задан для PostgreSQL");
+            }
+            if (password.isEmpty()) {
+                throw new IllegalStateException("DB_PASSWORD не задан для PostgreSQL");
+            }
         }
+
+        config.setUsername(username);
         config.setPassword(password);
 
-        // Устанавливаем драйвер PostgreSQL
-        if (jdbcUrl.startsWith("jdbc:h2:")) {
+        // Устанавливаем драйвер в зависимости от типа БД
+        if (isH2) {
             config.setDriverClassName("org.h2.Driver");
         } else if (jdbcUrl.startsWith("jdbc:postgresql:")) {
             config.setDriverClassName("org.postgresql.Driver");
         } else {
-            throw new IllegalArgumentException("Неизвестный тип JDBC URL: " + jdbcUrl);
+            throw new IllegalArgumentException("Unsupported JDBC URL: " + jdbcUrl);
         }
 
-        // Настройки пула соединений
-        config.setMaximumPoolSize(10); // максимальное число соединений
-        config.setMinimumIdle(2);      // минимальное число "живых" соединений
+        // Оптимизации для H2
+        if (isH2) {
+            config.setPoolName("H2Pool");
+            config.setMaximumPoolSize(5);
+            config.setConnectionInitSql("SELECT 1");
+        } else {
+            config.setMaximumPoolSize(10);
+            config.setMinimumIdle(2);
+        }
 
         DATA_SOURCE = new HikariDataSource(config);
     }

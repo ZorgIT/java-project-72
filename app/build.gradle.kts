@@ -73,13 +73,15 @@ tasks.withType<JacocoReport> {
 }
 
 // Настройка задачи test
-tasks.test {
+tasks.withType<Test> {
+    systemProperty("env", "test")
+
     useJUnitPlatform()
-    finalizedBy(tasks.jacocoTestReport)  // Запуск jacocoTestReport после test
+    finalizedBy(tasks.jacocoTestReport)
 
     testLogging {
         exceptionFormat = TestExceptionFormat.FULL
-        events = mutableSetOf(
+        events = setOf(
             TestLogEvent.FAILED,
             TestLogEvent.PASSED,
             TestLogEvent.SKIPPED
