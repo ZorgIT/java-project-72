@@ -18,24 +18,58 @@
           integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
           crossorigin="anonymous">
     <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
         body {
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
         }
 
         .content-wrapper {
             flex: 1;
         }
 
-        @supports not (min-height: 100dvh) {
-            html { height: 100%; }
-            body { min-height: 100%; }
+        /* Fix for flash message gap */
+        .alert {
+            margin-bottom: 0 !important;
+            border-radius: 0 !important;
+        }
+
+        .dark-section {
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+        }
+
+        .content > * {
+            margin: 0;
+            padding: 0;
         }
 
         .--brisk-axd {
             filter: blur(4px);
             user-select: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border-color: #bee5eb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
         }
     </style>
 </head>
@@ -60,30 +94,24 @@
         </div>
     </div>
 </nav>
+
 <main class="content-wrapper">
-    @if(page instanceof hexlet.code.dto.MainPage && !((hexlet.code.dto.MainPage) page).isVisited())
-        <h1>Привет, c Хекслет!</h1>
-        <p>Это сообщение показывается только один раз. Тест куки.</p>
-    @endif
-    @if(page != null && page.getFlash() != null)
-<%--
-TODO доработать  блок вывода флеш
-<p>${page.getFlash()}</p>
-сообщений
---%>
+    @if(page != null && page.getFlash() != null && !page.getFlash().isEmpty())
+        <div class="alert alert-${page.getFlashType()}" role="alert">
+            ${page.getFlash()}
+        </div>
     @endif
     <div class="content">
         ${content}
     </div>
 </main>
 
-
 @if (footer != null)
     <div class="footer">
         ${footer}
     </div>
 @else
-    <footer class="footer border-top py-3 bg-light"> <!-- Убрали mt-5 -->
+    <footer class="footer border-top py-3 bg-light">
         <div class="container-xl">
             <div class="text-center">
                 created by

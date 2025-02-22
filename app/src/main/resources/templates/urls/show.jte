@@ -1,7 +1,6 @@
 @import hexlet.code.dto.urls.UrlPage
 @import io.javalin.http.Context
 
-
 @param UrlPage page
 @param Context ctx
 

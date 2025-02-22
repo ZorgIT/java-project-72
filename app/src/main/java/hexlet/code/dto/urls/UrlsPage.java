@@ -19,4 +19,18 @@ public class UrlsPage extends Page {
         this.header = header;
     }
 
+    public UrlsPage(List<Url> urls, String title, String header, String flash) {
+        super(title, flash);
+        this.urls = urls;
+        this.title = title;
+        this.header = header;
+    }
+
+    public UrlsPage(List<Url> urls, String title, String header, String flash, String flashType) {
+        super(title, flash, flashType);
+        this.urls = urls;
+        this.title = title;
+        this.header = header;
+    }
+
 }

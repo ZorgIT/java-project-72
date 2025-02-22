@@ -25,11 +25,10 @@ import static io.javalin.rendering.template.TemplateUtil.model;
 public class UrlController {
     public static void index(Context ctx) {
         String flash = ctx.consumeSessionAttribute("flash");
-        ArrayList<Url> urls = new ArrayList<>();
-        var header = "Сайты";
-        var pageTitle = "Анализатор страниц";
-        urls = (ArrayList<Url>) UrlRepository.findAll();
-        var page = new UrlsPage(urls, pageTitle, header);
+        String flashType = ctx.consumeSessionAttribute("flashType");
+        List<Url> urls = UrlRepository.findAll();
+        var page = new UrlsPage(urls, "Анализатор страниц", "Сайты", flash, flashType);
+        //page.setFlash(flash);
         //page.setFlash(ctx.consumeSessionAttribute(flash));
         ctx.render("urls/index.jte", model(
                 "page", page,
@@ -59,28 +58,36 @@ public class UrlController {
 
         try {
             if (inputUrl == null || inputUrl.isEmpty()) {
-                throw new ValidationException(Map.of("url",
-                        List.of(new ValidationError<>("URL не может быть пустым"))));
+                throw new ValidationException(Map.of("url", List.of(new ValidationError<>("URL не может быть пустым"))));
             }
 
             URI uri = new URI(inputUrl.trim());
-            URL url = uri.toURL();
+            if (!uri.isAbsolute()) {
+                throw new ValidationException(Map.of("url", List.of(new ValidationError<>("Некорректный URL"))));
+            }
 
-            // Нормализуем URL (убираем путь/параметры)
+            URL url = uri.toURL();
             String normalizedUrl = url.getProtocol() + "://" + url.getAuthority();
 
-            Url checkedUrl = new Url(normalizedUrl);
-            UrlRepository.save(checkedUrl);
-            ctx.sessionAttribute("flash", "Страница успешно добавлена");
+            boolean urlExists = UrlRepository.findAll().stream()
+                    .anyMatch(u -> u.getName().equals(normalizedUrl));
+
+            if (urlExists) {
+                ctx.sessionAttribute("flash", "Страница уже существует");
+                ctx.sessionAttribute("flashType", "info");
+            } else {
+                Url checkedUrl = new Url(normalizedUrl);
+                UrlRepository.save(checkedUrl);
+                ctx.sessionAttribute("flash", "Страница успешно добавлена");
+                ctx.sessionAttribute("flashType", "success");
+            }
             ctx.redirect(NamedRoutes.urlsPath());
+
         } catch (ValidationException e) {
-            var page = new MainPage(inputUrl, "Input error");
+            var page = new MainPage("Анализатор страниц", "Некорректный URL", "error");
             ctx.render("index.jte", model("page", page));
-        } catch (URISyntaxException e) {
-            var page = new MainPage(inputUrl, "Input error");
-            ctx.render("index.jte", model("page", page));
-        } catch (MalformedURLException e) {
-            var page = new MainPage(inputUrl, "Input error");
+        } catch (URISyntaxException | MalformedURLException e) {
+            var page = new MainPage("Анализатор страниц", "Некорректный URL", "error");
             ctx.render("index.jte", model("page", page));
         }
     }
