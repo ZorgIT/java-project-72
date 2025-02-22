@@ -26,7 +26,9 @@ public class UrlRepository extends BaseRepository {
                      "CREATE TABLE IF NOT EXISTS urls ("
                              + "id BIGSERIAL PRIMARY KEY, "
                              + "name VARCHAR(255) NOT NULL UNIQUE, "
-                             + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
+                             + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+                             + "checked_at DATE DEFAULT NULL,"
+                             + "response_code VARCHAR(255) NULL UNIQUE)"
              )) {
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -35,19 +37,35 @@ public class UrlRepository extends BaseRepository {
     }
 
     public static void save(Url url) {
-        try (Connection connection = getConnection();
-             PreparedStatement stmt = connection.prepareStatement(
-                     "INSERT INTO urls (name, created_at) VALUES (?, ?)",
-                     Statement.RETURN_GENERATED_KEYS
-             )) {
-            stmt.setString(1, url.getName());
-            stmt.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
-            stmt.executeUpdate();
+        try (Connection connection = getConnection()) {
+            // Проверка на уникальность добавляемого URL
+            try (PreparedStatement checkStmt = connection.prepareStatement(
+                    "SELECT id FROM urls WHERE name = ?"
+            )) {
+                checkStmt.setString(1, url.getName());
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next()) {
+                        // Если URL уже существует, устанавливаем его id и выходим из метода
+                        url.setId(rs.getLong("id"));
+                        return;
+                    }
+                }
+            }
 
-            // Получаем сгенерированный идентификатор
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    url.setId(generatedKeys.getLong(1));
+            // Если URL не найден, выполняем вставку
+            try (PreparedStatement stmt = connection.prepareStatement(
+                    "INSERT INTO urls (name, created_at) VALUES (?, ?)",
+                    Statement.RETURN_GENERATED_KEYS
+            )) {
+                stmt.setString(1, url.getName());
+                stmt.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+                stmt.executeUpdate();
+
+                // Получаем сгенерированный идентификатор
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        url.setId(generatedKeys.getLong(1));
+                    }
                 }
             }
         } catch (SQLException e) {

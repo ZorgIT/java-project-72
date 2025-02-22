@@ -60,7 +60,6 @@ public class UrlController {
     public static void create(Context ctx) {
         var inputUrl = ctx.formParam("url");
 
-
         try {
             if (inputUrl == null || inputUrl.isEmpty()) {
                 throw new ValidationException(Map.of("url",

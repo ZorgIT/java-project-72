@@ -66,7 +66,11 @@
         <p>Это сообщение показывается только один раз. Тест куки.</p>
     @endif
     @if(page != null && page.getFlash() != null)
-        <p>${page.getFlash()}</p>
+<%--
+TODO доработать  блок вывода флеш
+<p>${page.getFlash()}</p>
+сообщений
+--%>
     @endif
     <div class="content">
         ${content}
