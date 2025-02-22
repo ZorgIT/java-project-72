@@ -24,7 +24,7 @@ public class AppTest {
         // Создаем таблицу перед каждым тестом
         try (Connection connection = Database.getDataSource().getConnection();
              Statement stmt = connection.createStatement()) {
-            stmt.execute(                     "CREATE TABLE IF NOT EXISTS urls ("
+            stmt.execute("CREATE TABLE IF NOT EXISTS urls("
                     + "id BIGSERIAL PRIMARY KEY, "
                     + "name VARCHAR(255) NOT NULL UNIQUE, "
                     + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"

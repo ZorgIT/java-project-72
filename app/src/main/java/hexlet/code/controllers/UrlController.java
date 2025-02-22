@@ -16,7 +16,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URI;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +57,8 @@ public class UrlController {
 
         try {
             if (inputUrl == null || inputUrl.isEmpty()) {
-                throw new ValidationException(Map.of("url", List.of(new ValidationError<>("URL не может быть пустым"))));
+                throw new ValidationException(Map.of("url",
+                        List.of(new ValidationError<>("URL не может быть пустым"))));
             }
 
             URI uri = new URI(inputUrl.trim());
