@@ -1,14 +1,13 @@
-@import hexlet.code.models.Page
+@import hexlet.code.dto.urls.UrlPage
 @import io.javalin.http.Context
 
-@param Page page
+
+@param UrlPage page
 @param Context ctx
 
 @template.layout.pageTmpl(content = @`
     <main class="flex-grow-1">
-
         <section>
-
             <div class="container-lg mt-5">
                 <h1>Сайт: https://javalin.io</h1>
 
@@ -16,26 +15,24 @@
                     <tbody>
                     <tr>
                         <td>ID</td>
-                        <td>1</td>
+                        <td>${page.getUrl().getId()}</td>
                     </tr>
                     <tr>
                         <td>Имя</td>
-                        <td>https://javalin.io</td>
+                        <td>${page.getUrl().getName()}</td>
                     </tr>
                     <tr>
                         <td>Дата создания</td>
-                        <td>11/02/2025 19:43</td>
+                        <td>${page.getUrl().getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))}</td>
                     </tr>
                     </tbody>
                 </table>
-
                 <h2 class="mt-5">Проверки</h2>
                 <form method="post" action="/urls/1/checks">
                     <button type="submit" class="btn btn-primary">Запустить
                         проверку
                     </button>
                 </form>
-
                 <table class="table table-bordered table-hover mt-3">
                     <thead>
                     <tr>
@@ -48,16 +45,12 @@
                     </tr>
                     </thead>
                     <tbody>
-
                     </tbody>
                 </table>
             </div>
-
         </section>
     </main>`,
 page = page,
 ctx = ctx,
-footer = @`
-    <h1><a href="https://github.com/ZorgIT">GitHub</a></h1>
-`)
+footer = null)
 

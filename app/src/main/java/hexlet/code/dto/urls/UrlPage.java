@@ -2,8 +2,10 @@ package hexlet.code.dto.urls;
 
 import hexlet.code.models.Page;
 import hexlet.code.models.Url;
+import lombok.Getter;
 
 
+@Getter
 public class UrlPage extends Page {
     private Url url;
     private String title;

@@ -8,9 +8,16 @@ public class NamedRoutes {
         return URLS;
     }
 
+    public static String urlsPath(String id) {
+        return URLS + "/" + id;
+    }
+
     public static String testdbPath() {
         return TESTDB;
     }
+
+
+
     /*private static final String USERS = "/users";
     private static final String COURSES = "/courses";
     private static final String BUILD = "/build";

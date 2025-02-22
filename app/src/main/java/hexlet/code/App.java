@@ -63,7 +63,8 @@ public class App {
         });
 
         app.get(NamedRoutes.urlsPath(), UrlController::index);
-        app.post(NamedRoutes.urlsPath(),UrlController::create);
+        app.get(NamedRoutes.urlsPath("{id}"), UrlController::show);
+        app.post(NamedRoutes.urlsPath(), UrlController::create);
 
 
         //TODO удалить тестовый маршрут.

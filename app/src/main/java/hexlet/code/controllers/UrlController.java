@@ -16,10 +16,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URI;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -43,9 +40,9 @@ public class UrlController {
     }
 
     public static void show(Context ctx) {
-        var courseId = ctx.pathParamAsClass("id", Long.class).get();
+        var urlId = ctx.pathParamAsClass("id", Long.class).get();
         var url =
-                UrlRepository.findAll().stream().filter(x -> x.getId() == courseId)
+                UrlRepository.findAll().stream().filter(x -> x.getId() == urlId)
                         .findFirst().orElseThrow(() -> new NotFoundResponse("Course not found"));
         var pageTitle = "Сайт : " + url.getName();
         var page = new UrlPage(url, pageTitle, "Анализатор страниц");
@@ -87,6 +84,4 @@ public class UrlController {
             ctx.render("index.jte", model("page", page));
         }
     }
-
-
 }
