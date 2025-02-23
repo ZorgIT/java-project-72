@@ -2,37 +2,33 @@
 .PHONY: build setup clean install run run-dist test lint check-deps report
 
 setup:
-	сhmod +x app/gradlew
-	cd app && ./gradlew wrapper --gradle-version 8.8
+	cd app && chmod +x ./gradlew && ./gradlew wrapper --gradle-version 8.8
 
 clean:
-	сhmod +x app/gradlew	
-	cd app && ./gradlew clean
+	cd app && chmod +x ./gradlew && ./gradlew clean
 
 build:
-	сhmod +x app/gradlew
-	cd app && ./gradlew clean build --stacktrace
+	cd app && chmod +x ./gradlew && ./gradlew clean build --stacktrace
 
 install:
-	сhmod +x app/gradlew
-	cd app && ./gradlew clean installDist  # Используем явное указание задачи
+	cd app && chmod +x ./gradlew && ./gradlew clean installDist
 
 run-dist:
-	cd app && ./build/install/app/bin/app
+	cd app && chmod +x ./gradlew && ./build/install/app/bin/app
 
 run:
-	cd app && ./gradlew run
+	cd app && chmod +x ./gradlew && ./gradlew run
 
 test:
-	cd app && ./gradlew jacocoTestReport
+	cd app && chmod +x ./gradlew && ./gradlew jacocoTestReport
 
 lint:
-	cd app && ./gradlew checkstyleMain
+	cd app && chmod +x ./gradlew && ./gradlew checkstyleMain
 
 check-deps:
-	cd app && ./gradlew dependencyUpdates -Drevision=release
+	cd app && chmod +x ./gradlew && ./gradlew dependencyUpdates -Drevision=release
 
 report:
-	cd app && ./gradlew jacocoTestReport
+	cd app && chmod +x ./gradlew && ./gradlew jacocoTestReport
 
 build-run: build run
