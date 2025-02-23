@@ -7,6 +7,7 @@ import hexlet.code.repositories.UrlRepository;
 import hexlet.code.repositories.UrlCheckRepository;
 import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -50,6 +51,15 @@ public class AppTest {
 
         UrlRepository.removeAll();
         UrlCheckRepository.removeAll();
+    }
+
+    @AfterEach
+    public void tearDown() throws SQLException {
+        // Закрываем соединение после тестов
+        if (connection != null) {
+            connection.close();
+        }
+        app.stop();
     }
 
     @Test
