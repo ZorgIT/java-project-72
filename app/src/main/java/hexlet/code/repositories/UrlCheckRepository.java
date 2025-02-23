@@ -95,11 +95,9 @@ public class UrlCheckRepository extends BaseRepository {
     public static void removeAll() throws SQLException {
         try (Connection connection = getConnection();
              Statement stmt = connection.createStatement()) {
-            stmt.execute("SET REFERENTIAL_INTEGRITY FALSE");
-            stmt.execute("TRUNCATE TABLE url_checks RESTART IDENTITY");
-            stmt.execute("TRUNCATE TABLE urls RESTART IDENTITY");
-            stmt.execute("SET REFERENTIAL_INTEGRITY TRUE");
+            stmt.execute("DELETE FROM url_checks");
         } catch (SQLException e) {
+            // Ignore if table doesn't exist
             if (!e.getMessage().contains("Table \"URL_CHECKS\" not found")) {
                 throw e;
             }

@@ -118,12 +118,12 @@ public class UrlRepository extends BaseRepository {
     public static void removeAll() throws SQLException {
         try (Connection connection = getConnection();
              Statement stmt = connection.createStatement()) {
-            stmt.execute("SET REFERENTIAL_INTEGRITY FALSE");
-            stmt.execute("TRUNCATE TABLE url_checks RESTART IDENTITY");
-            stmt.execute("TRUNCATE TABLE urls RESTART IDENTITY");
-            stmt.execute("SET REFERENTIAL_INTEGRITY TRUE");
+            // Delete all checks first to respect foreign key constraints
+            stmt.execute("DELETE FROM url_checks");
+            // Delete all URLs
+            stmt.execute("DELETE FROM urls");
         } catch (SQLException e) {
-            // Игнорируем ошибку если таблицы нет
+            // Ignore if tables don't exist yet
             if (!e.getMessage().contains("Table \"URLS\" not found")) {
                 throw e;
             }

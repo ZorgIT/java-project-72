@@ -21,18 +21,9 @@ public class AppTest {
     @BeforeEach
     public void setUp() throws IOException, SQLException {
         app = App.getApp();
-        System.setProperty("JDBC_DATABASE_URL", "jdbc:h2:mem:testdb;"
-                + "DB_CLOSE_DELAY=-1;MODE=PostgreSQL");
-        System.setProperty("DB_USERNAME", "sa");
-        System.setProperty("DB_PASSWORD", "sa");
-
         // Создаем таблицу перед каждым тестом
         try (Connection connection = Database.getDataSource().getConnection();
              Statement stmt = connection.createStatement()) {
-            System.setProperty("JDBC_DATABASE_URL", "jdbc:h2:mem:testdb;"
-                    + "DB_CLOSE_DELAY=-1;MODE=PostgreSQL");
-            System.setProperty("DB_USERNAME", "sa");
-            System.setProperty("DB_PASSWORD", "sa");
             stmt.execute("CREATE TABLE IF NOT EXISTS urls("
                     + "id BIGSERIAL PRIMARY KEY, "
                     + "name VARCHAR(255) NOT NULL UNIQUE, "
