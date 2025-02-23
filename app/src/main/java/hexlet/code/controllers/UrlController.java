@@ -4,6 +4,7 @@ import hexlet.code.dto.MainPage;
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.dto.urls.UrlsPage;
 import hexlet.code.models.Url;
+import hexlet.code.repositories.UrlCheckRepository;
 import hexlet.code.repositories.UrlRepository;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.http.Context;
@@ -42,8 +43,9 @@ public class UrlController {
         var url =
                 UrlRepository.findAll().stream().filter(x -> x.getId() == urlId)
                         .findFirst().orElseThrow(() -> new NotFoundResponse("Course not found"));
+        var urlChecks = UrlCheckRepository.findAllById(url.getId());
         var pageTitle = "Сайт : " + url.getName();
-        var page = new UrlPage(url, pageTitle, "Анализатор страниц");
+        var page = new UrlPage(url, urlChecks, pageTitle, "Анализатор страниц");
         ctx.render("urls/show.jte", model(
                 "page", page,
                 "content", "",
@@ -91,4 +93,9 @@ public class UrlController {
             ctx.render("index.jte", model("page", page));
         }
     }
+
+    public static void check(Context ctx) {
+
+    }
+
 }

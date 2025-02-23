@@ -5,6 +5,7 @@ import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
 import hexlet.code.controllers.UrlController;
 import hexlet.code.dto.MainPage;
+import hexlet.code.repositories.UrlCheckRepository;
 import hexlet.code.repositories.UrlRepository;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.Javalin;
@@ -17,10 +18,13 @@ import static io.javalin.rendering.template.TemplateUtil.model;
 public class App {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     private static final UrlRepository URL_REPOSITORY = new UrlRepository(Database.getDataSource());
+    private static final UrlCheckRepository URL_CHECK_REPOSITORY =
+            new UrlCheckRepository(Database.getDataSource());
 
     public static void main(String[] args) {
         var app = getApp();
         URL_REPOSITORY.createTable();
+        URL_CHECK_REPOSITORY.createTable();
         // Регистрируем shutdown hook для закрытия DataSource
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             LOGGER.info("Закрытие пула соединений...//close connection pull");
@@ -62,6 +66,7 @@ public class App {
         app.get(NamedRoutes.urlsPath(), UrlController::index);
         app.get(NamedRoutes.urlsPath("{id}"), UrlController::show);
         app.post(NamedRoutes.urlsPath(), UrlController::create);
+        app.post(NamedRoutes.urlsPath("{id}"), UrlController::check);
 
         return app;
     }

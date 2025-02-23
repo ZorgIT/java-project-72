@@ -4,6 +4,7 @@
 @param UrlPage page
 @param Context ctx
 
+
 @template.layout.pageTmpl(content = @`
     <main class="flex-grow-1">
         <section>
@@ -27,7 +28,8 @@
                     </tbody>
                 </table>
                 <h2 class="mt-5">Проверки</h2>
-                <form method="post" action="/urls/1/checks">
+                <form method="post"
+                      action="/urls/${page.getUrl().getId()}/checks">
                     <button type="submit" class="btn btn-primary">Запустить
                         проверку
                     </button>
@@ -43,8 +45,35 @@
                         <th class="col-2">Дата проверки</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    </tbody>
+                    @if (page.getUrlChecks() != null && !page.getUrlChecks().isEmpty())
+                        <tbody>
+                        @for(var urlCheck: page.getUrlChecks())
+                            <td>${urlCheck.getId()}</td>
+                            <td>${urlCheck.getStatusCode()}</td>
+                            <td>
+                                @if(urlCheck.getTitle() != null)
+                                    ${urlCheck.getTitle()}
+                                @endif
+                            </td>
+                            <td>
+                                @if(urlCheck.getH1() != null)
+                                    ${urlCheck.getH1()}
+                                @endif
+                            </td>
+                            <td>
+                                @if(urlCheck.getDescription() != null)
+                                    ${urlCheck.getDescription()}
+                                @endif
+                            </td>
+                            <td>
+                                @if(urlCheck.getTitle() != null)
+                                    ${urlCheck.getTitle()}
+                                @endif
+                            </td>
+                            <td>${urlCheck.getCreatedAt()}</td>
+                        @endfor
+                        </tbody>
+                    @endif
                 </table>
             </div>
         </section>
