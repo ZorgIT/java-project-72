@@ -25,17 +25,15 @@ content = @`
                     @for(var url: page.getUrls())
                         <tr>
                             <td>${url.getId()}</td>
+                            <td><a href="/urls/${url.getId()}">${url.getName()}</a></td>
                             <td>
-                                <a href="/urls/${url.getId()}">${url.getName()}</a>
-                            </td>
-                            <td>
-                                @if(url.getCheckedAt() != null)
-                                    url.getCheckedAt().toString()
+                                @if(url.getLastCheck() != null)
+                                    ${url.getCreatedAt().toString()}
                                 @endif
                             </td>
                             <td>
-                                @if(url.getResponseCode() != null)
-                                    url.getResponseCode()
+                                @if(url.getLastCheck() != null)
+                                    ${url.getResponseCode()}
                                 @endif
                             </td>
                         </tr>

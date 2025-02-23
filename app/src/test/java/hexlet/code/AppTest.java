@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import hexlet.code.models.Url;
 import hexlet.code.repositories.UrlRepository;
+import hexlet.code.repositories.UrlCheckRepository;
 import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,9 +31,19 @@ public class AppTest {
                     + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
                     + "checked_at DATE DEFAULT NULL,"
                     + "response_code VARCHAR(255) NULL UNIQUE)");
+
+            stmt.execute("CREATE TABLE IF NOT EXISTS url_checks ("
+                    + "id BIGSERIAL PRIMARY KEY, "
+                    + "url_id BIGINT REFERENCES urls(id), "
+                    + "status_code INT, "
+                    + "title TEXT, "
+                    + "h1 TEXT, "
+                    + "description TEXT, "
+                    + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
         }
 
-        UrlRepository.removeAll(); // Очищаем таблицу
+        UrlRepository.removeAll();
+        UrlCheckRepository.removeAll();  // Очищаем таблицу
     }
 
     @Test

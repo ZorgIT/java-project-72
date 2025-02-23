@@ -11,7 +11,7 @@ public class Url {
     private Long id;
     private String name;
     private LocalDateTime createdAt;
-    private LocalDateTime checkedAt;
+    private LocalDateTime lastCheck;
     private String responseCode;
 
     public Url(Long id, String name, LocalDateTime createdAt) {

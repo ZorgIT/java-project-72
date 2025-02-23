@@ -24,7 +24,7 @@ repositories {
 
 dependencies {
     //environment
-    implementation ("io.github.cdimascio:java-dotenv:5.2.2")
+    implementation("io.github.cdimascio:java-dotenv:5.2.2")
     //db
     implementation("com.h2database:h2:2.2.224")
     implementation("org.postgresql:postgresql:42.5.0")
@@ -33,7 +33,12 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.16.1")
     implementation("org.apache.commons:commons-text:1.11.0")
     implementation("gg.jte:jte:3.1.9")
-        //implementation("org.slf4j:slf4j-simple:2.0.9")
+    //parsing html
+    implementation("org.jsoup:jsoup:1.18.3")
+    //Mock web
+    implementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    implementation("com.konghq:unirest-java-core:4.4.5")
+    //implementation("org.slf4j:slf4j-simple:2.0.9")
     implementation("ch.qos.logback:logback-classic:1.5.6")
     implementation("io.javalin:javalin:6.1.3")
     implementation("io.javalin:javalin-bundle:6.1.3")
@@ -64,7 +69,7 @@ tasks.withType<JacocoReport> {
                 exclude(
                     "**/*Test.class",
                     //"**/Main.class" Пример: исключение главного класса,
-                // если нужно
+                    // если нужно
                 )
             }
         })

@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class UrlRepository extends BaseRepository {
 
@@ -91,11 +92,36 @@ public class UrlRepository extends BaseRepository {
         }
         return urls;
     }
+    public static Optional<Url> findById(Long id) {
+        String sql = "SELECT * FROM urls WHERE id = ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Url url = new Url(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getTimestamp("created_at").toLocalDateTime()
+                );
+                return Optional.of(url);
+            }
+            return Optional.empty();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void removeAll() throws SQLException {
         try (Connection connection = getConnection();
              Statement stmt = connection.createStatement()) {
+            stmt.execute("SET REFERENTIAL_INTEGRITY FALSE");
+            stmt.execute("TRUNCATE TABLE url_checks RESTART IDENTITY");
             stmt.execute("TRUNCATE TABLE urls RESTART IDENTITY");
+            stmt.execute("SET REFERENTIAL_INTEGRITY TRUE");
         } catch (SQLException e) {
             // Игнорируем ошибку если таблицы нет
             if (!e.getMessage().contains("Table \"URLS\" not found")) {

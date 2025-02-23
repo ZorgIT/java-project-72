@@ -9,7 +9,7 @@
     <main class="flex-grow-1">
         <section>
             <div class="container-lg mt-5">
-                <h1>Сайт: https://javalin.io</h1>
+                <h1>Сайт: ${page.getUrl().getName()}</h1>
 
                 <table class="table table-bordered table-hover mt-3">
                     <tbody>
@@ -48,6 +48,7 @@
                     @if (page.getUrlChecks() != null && !page.getUrlChecks().isEmpty())
                         <tbody>
                         @for(var urlCheck: page.getUrlChecks())
+                            <tr>
                             <td>${urlCheck.getId()}</td>
                             <td>${urlCheck.getStatusCode()}</td>
                             <td>
@@ -65,12 +66,8 @@
                                     ${urlCheck.getDescription()}
                                 @endif
                             </td>
-                            <td>
-                                @if(urlCheck.getTitle() != null)
-                                    ${urlCheck.getTitle()}
-                                @endif
-                            </td>
-                            <td>${urlCheck.getCreatedAt()}</td>
+                            <td>${urlCheck.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))}</td>
+                            </tr>
                         @endfor
                         </tbody>
                     @endif

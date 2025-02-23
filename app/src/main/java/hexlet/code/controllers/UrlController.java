@@ -1,12 +1,14 @@
 package hexlet.code.controllers;
 
 import hexlet.code.dto.MainPage;
+import hexlet.code.dto.UrlCheck;
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.dto.urls.UrlsPage;
 import hexlet.code.models.Url;
 import hexlet.code.repositories.UrlCheckRepository;
 import hexlet.code.repositories.UrlRepository;
 import hexlet.code.util.NamedRoutes;
+import hexlet.code.util.UrlChecks;
 import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;
 import io.javalin.validation.ValidationError;
@@ -28,8 +30,6 @@ public class UrlController {
         String flashType = ctx.consumeSessionAttribute("flashType");
         List<Url> urls = UrlRepository.findAll();
         var page = new UrlsPage(urls, "Анализатор страниц", "Сайты", flash, flashType);
-        //page.setFlash(flash);
-        //page.setFlash(ctx.consumeSessionAttribute(flash));
         ctx.render("urls/index.jte", model(
                 "page", page,
                 "content", "",
@@ -40,12 +40,17 @@ public class UrlController {
 
     public static void show(Context ctx) {
         var urlId = ctx.pathParamAsClass("id", Long.class).get();
-        var url =
-                UrlRepository.findAll().stream().filter(x -> x.getId() == urlId)
-                        .findFirst().orElseThrow(() -> new NotFoundResponse("Course not found"));
-        var urlChecks = UrlCheckRepository.findAllById(url.getId());
-        var pageTitle = "Сайт : " + url.getName();
-        var page = new UrlPage(url, urlChecks, pageTitle, "Анализатор страниц");
+        var url = UrlRepository.findById(urlId)
+                .orElseThrow(() -> new NotFoundResponse("URL not found"));
+        var urlChecks = UrlCheckRepository.findAllById(urlId);
+
+        String flash = ctx.consumeSessionAttribute("flash");
+        String flashType = ctx.consumeSessionAttribute("flashType");
+
+        var page = new UrlPage(url, urlChecks, "Сайт: " + url.getName(), "Анализатор страниц");
+        page.setFlash(flash);
+        page.setFlashType(flashType);
+
         ctx.render("urls/show.jte", model(
                 "page", page,
                 "content", "",
@@ -95,7 +100,23 @@ public class UrlController {
     }
 
     public static void check(Context ctx) {
+        Long urlId = ctx.pathParamAsClass("id", Long.class).get();
+        Url url = UrlRepository.findById(urlId)
+                .orElseThrow(() -> new NotFoundResponse("URL not found"));
 
+        try {
+            UrlCheck check = UrlChecks.check(url.getName());
+            check.setUrlId(urlId);
+            UrlCheckRepository.save(check);
+            ctx.sessionAttribute("flash", "Проверка выполнена успешно");
+            ctx.sessionAttribute("flashType", "success");
+
+        } catch (RuntimeException e) {
+            ctx.sessionAttribute("flash", "Невозможно выполнить проверку");
+            ctx.sessionAttribute("flashType", "danger");
+        }
+
+        ctx.redirect(NamedRoutes.urlsPath(urlId));
     }
 
 }
