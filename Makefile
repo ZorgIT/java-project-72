@@ -6,12 +6,15 @@ setup:
 	cd app && ./gradlew wrapper --gradle-version 8.8
 
 clean:
+	сhmod +x app/gradlew	
 	cd app && ./gradlew clean
 
 build:
+	сhmod +x app/gradlew
 	cd app && ./gradlew clean build --stacktrace
 
 install:
+	сhmod +x app/gradlew
 	cd app && ./gradlew clean installDist  # Используем явное указание задачи
 
 run-dist:
