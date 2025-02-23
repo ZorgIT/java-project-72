@@ -81,6 +81,10 @@ tasks.withType<JacocoReport> {
 tasks.withType<Test> {
     systemProperty("env", "test")
 
+    systemProperty("JDBC_DATABASE_URL", "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL")
+    systemProperty("DB_USERNAME", "sa")
+    systemProperty("DB_PASSWORD", "")
+
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
 
