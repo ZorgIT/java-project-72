@@ -48,8 +48,8 @@ public class Database {
 
             // Проверяем, заданы ли все переменные для PostgreSQL
             if (username.isEmpty() || password.isEmpty()) {
-                throw new IllegalStateException("Отсутствуют учетные данные для PostgreSQL! " +
-                        "Добавьте DB_USERNAME и DB_PASSWORD.");
+                throw new IllegalStateException("Отсутствуют учетные данные для PostgreSQL! "
+                        + "Добавьте DB_USERNAME и DB_PASSWORD.");
             }
 
             config.setJdbcUrl(jdbcUrl);
