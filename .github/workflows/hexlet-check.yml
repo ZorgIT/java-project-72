@@ -21,6 +21,5 @@ jobs:
       - name: Hexlet project check
         uses: hexlet/project-action@release
         with:
-          run: chmod +x app/gradlew
           hexlet-id: ${{ secrets.HEXLET_ID }}
           
