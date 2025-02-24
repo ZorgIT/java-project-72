@@ -1,38 +1,47 @@
 .DEFAULT_GOAL := build-run
-.PHONY: build setup clean install run run-dist test lint check-deps report
+.PHONY: build setup clean install run run-dist test lint check-deps report check-gradle-version
 
-# Пути относительно корня проекта
+# Настройки
 GRADLE_CMD := ./app/gradlew
 APP_DIR := app
+REQUIRED_GRADLE_VERSION := 8.8
 
-setup:
-	$(GRADLE_CMD) wrapper --gradle-version 8.8
+# Проверка версии Gradle
+check-gradle-version:
+	@if ! grep -q "gradle-${REQUIRED_GRADLE_VERSION}" ${APP_DIR}/gradle/wrapper/gradle-wrapper.properties; then \
+		echo "ERROR: Gradle version must be ${REQUIRED_GRADLE_VERSION}. Run 'make setup' to fix."; \
+		exit 1; \
+	fi
 
-clean:
-	$(GRADLE_CMD) clean
+# Цели с зависимостью от проверки версии
+setup: check-gradle-version
+	${GRADLE_CMD} wrapper --gradle-version ${REQUIRED_GRADLE_VERSION}
 
-build:
-	$(GRADLE_CMD) clean build --stacktrace
+clean: check-gradle-version
+	${GRADLE_CMD} clean
 
-install:
-	$(GRADLE_CMD) clean  installShadowDist
+build: check-gradle-version
+	${GRADLE_CMD} clean build --stacktrace
 
-run-dist:
-	$(APP_DIR)/build/install/app/bin/app
+install: check-gradle-version
+	${GRADLE_CMD} clean installShadowDist
 
-run:
-	$(GRADLE_CMD) run
+run-dist: check-gradle-version
+	${APP_DIR}/build/install/app/bin/app
 
-test:
-	$(GRADLE_CMD) jacocoTestReport
+run: check-gradle-version
+	${GRADLE_CMD} run
 
-lint:
-	$(GRADLE_CMD) checkstyleMain
+test: check-gradle-version
+	${GRADLE_CMD} jacocoTestReport
 
-check-deps:
-	$(GRADLE_CMD) dependencyUpdates -Drevision=release
+lint: check-gradle-version
+	${GRADLE_CMD} checkstyleMain
 
-report:
-	$(GRADLE_CMD) jacocoTestReport
+check-deps: check-gradle-version
+	${GRADLE_CMD} dependencyUpdates -Drevision=release
+
+report: check-gradle-version
+	${GRADLE_CMD} jacocoTestReport
 
 build-run: build run
