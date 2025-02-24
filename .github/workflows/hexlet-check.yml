@@ -18,17 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v1
-      
-      - name: Force correct Gradle version
-        run: |
-          ./app/gradlew wrapper --gradle-version 8.8 --distribution-type bin
-          # Если есть подпроекты
-          find . -name "gradle-wrapper.properties" -exec sed -i 's/gradle-8.3-bin.zip/gradle-8.8-bin.zip/g' {} \;
-          
       - name: Hexlet project check
         uses: hexlet/project-action@release
         with:
           hexlet-id: ${{ secrets.HEXLET_ID }}
-          
