@@ -7,6 +7,7 @@ import hexlet.code.repositories.UrlRepository;
 import hexlet.code.repositories.UrlCheckRepository;
 import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,13 +18,20 @@ import java.sql.Statement;
 
 public class AppTest {
     private Javalin app;
+    private Connection connection;
 
     @BeforeEach
     public void setUp() throws IOException, SQLException {
+        // Устанавливаем тестовые учетные данные для базы
+        System.setProperty("DB_USERNAME", "test_user");
+        System.setProperty("DB_PASSWORD", "test_password");
+        System.setProperty("DB_URL", "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;");
+
         app = App.getApp();
-        // Создаем таблицу перед каждым тестом
-        try (Connection connection = Database.getDataSource().getConnection();
-             Statement stmt = connection.createStatement()) {
+
+        // Инициализируем подключение только внутри теста
+        connection = Database.getDataSource().getConnection();
+        try (Statement stmt = connection.createStatement()) {
             stmt.execute("CREATE TABLE IF NOT EXISTS urls("
                     + "id BIGSERIAL PRIMARY KEY, "
                     + "name VARCHAR(255) NOT NULL UNIQUE, "
@@ -42,7 +50,16 @@ public class AppTest {
         }
 
         UrlRepository.removeAll();
-        UrlCheckRepository.removeAll();  // Очищаем таблицу
+        UrlCheckRepository.removeAll();
+    }
+
+    @AfterEach
+    public void tearDown() throws SQLException {
+        // Закрываем соединение после тестов
+        if (connection != null) {
+            connection.close();
+        }
+        app.stop();
     }
 
     @Test
@@ -50,8 +67,7 @@ public class AppTest {
         JavalinTest.test(app, (server, client) -> {
             var response = client.get("/");
             assertThat(response.code()).isEqualTo(200);
-            assertThat(response.body().string())
-                    .contains("Домашняя страница");
+            assertThat(response.body().string()).contains("Домашняя страница");
         });
     }
 
@@ -69,9 +85,8 @@ public class AppTest {
             var requestBody = "url=https://example.com";
             var response = client.post("/urls", requestBody);
 
-            assertThat(response.code()).isEqualTo(200); // Проверяем редирект
-            assertThat(response.body().string())
-                    .contains("https://example.com");
+            assertThat(response.code()).isEqualTo(200);
+            assertThat(response.body().string()).contains("https://example.com");
 
             // Проверяем, что URL добавился в БД
             var urls = UrlRepository.findAll();
@@ -88,8 +103,7 @@ public class AppTest {
         JavalinTest.test(app, (server, client) -> {
             var response = client.get("/urls/" + url.getId());
             assertThat(response.code()).isEqualTo(200);
-            assertThat(response.body().string())
-                    .contains("https://example.com");
+            assertThat(response.body().string()).contains("https://example.com");
         });
     }
 
