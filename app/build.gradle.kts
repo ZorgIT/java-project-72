@@ -83,7 +83,7 @@ tasks.withType<JacocoReport> {
 // Настройка задачи test
 tasks.withType<Test> {
     environment("env", "test")
-    environment("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;MODE=PostgreSQL")
+    environment("JDBC_DATABASE_URL", "jdbc:h2:mem:project")
 
     environment("DB_USERNAME", "")
     environment("DB_PASSWORD", "")

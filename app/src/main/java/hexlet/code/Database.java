@@ -67,9 +67,6 @@ public class Database {
         } else {
 
             if (dbUser.isEmpty() || dbPass.isEmpty()) {
-                /*throw new IllegalStateException("Отсутствуют учетные данные
-                 для PostgreSQL! "
-                        + "Добавьте DB_USERNAME и DB_PASSWORD.");*/
                 jdbcUrl = "jdbc:h2:mem:project";
 
                 config.setJdbcUrl(jdbcUrl);
