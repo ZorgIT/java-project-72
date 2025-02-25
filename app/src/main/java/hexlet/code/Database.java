@@ -48,15 +48,15 @@ public class Database {
         passFromDotenv);*/
 
         // Вставляем отладочные принты:
-        System.out.println("==== DEBUG: Database init ====");
+        //System.out.println("==== DEBUG: Database init ====");
         // envValue
         String envValue = Optional.ofNullable(System.getenv("env"))
                 .orElse(System.getProperty("env", ""))
                 .toLowerCase();
-        System.out.println("envValue = " + envValue);
+        //System.out.println("envValue = " + envValue);
 
         boolean isTest = "test".equals(envValue);
-        System.out.println("isTest = " + isTest);
+        //System.out.println("isTest = " + isTest);
 
         Dotenv dotenv = Dotenv.configure()
                 .directory(isTest ? "src/test/resources" : ".")
@@ -69,35 +69,35 @@ public class Database {
         String jdbcUrlFromDotenv = dotenv.get("JDBC_DATABASE_URL", "");
 
         // Распечатываем
-        System.out.println("jdbcUrlFromProp = " + jdbcUrlFromProp);
+ /*       System.out.println("jdbcUrlFromProp = " + jdbcUrlFromProp);
         System.out.println("jdbcUrlFromEnv = " + jdbcUrlFromEnv);
-        System.out.println("jdbcUrlFromDotenv = " + jdbcUrlFromDotenv);
+        System.out.println("jdbcUrlFromDotenv = " + jdbcUrlFromDotenv);*/
 
         // Аналогично для user и pass
         String userFromProp = System.getProperty("DB_USERNAME");
         String userFromEnv = System.getenv("DB_USERNAME");
         String userFromDotenv = dotenv.get("DB_USERNAME", "");
-        System.out.println("userFromProp = " + userFromProp);
+ /*       System.out.println("userFromProp = " + userFromProp);
         System.out.println("userFromEnv = " + userFromEnv);
         System.out.println("userFromDotenv = " + userFromDotenv);
-
+*/
         String passFromProp = System.getProperty("DB_PASSWORD");
         String passFromEnv = System.getenv("DB_PASSWORD");
         String passFromDotenv = dotenv.get("DB_PASSWORD", "");
-        System.out.println("passFromProp = " + passFromProp);
+       /* System.out.println("passFromProp = " + passFromProp);
         System.out.println("passFromEnv = " + passFromEnv);
-        System.out.println("passFromDotenv = " + passFromDotenv);
+        System.out.println("passFromDotenv = " + passFromDotenv);*/
 
         // Теперь собираем final варианты
         String jdbcUrl = firstNonEmpty(jdbcUrlFromProp, jdbcUrlFromEnv, jdbcUrlFromDotenv);
         String dbUser = firstNonEmpty(userFromProp, userFromEnv, userFromDotenv);
         String dbPass = firstNonEmpty(passFromProp, passFromEnv, passFromDotenv);
 
-        // Выводим итог:
+        /*// Выводим итог:
         System.out.println("==== FINAL CHOICES BEFORE USE ====");
         System.out.println("jdbcUrl = " + jdbcUrl);
         System.out.println("dbUser = " + dbUser);
-        System.out.println("dbPass = " + dbPass);
+        System.out.println("dbPass = " + dbPass);*/
 
 
         HikariConfig config = new HikariConfig();
@@ -121,7 +121,7 @@ public class Database {
             System.out.println("Используется H2 (In-Memory Database): " + jdbcUrl);
         } else {
 
-            if (dbUser.isEmpty() || dbPass.isEmpty()) {
+          /*  if (dbUser.isEmpty() || dbPass.isEmpty()) {
                 jdbcUrl = "jdbc:h2:mem:project";
 
                 config.setJdbcUrl(jdbcUrl);
@@ -133,16 +133,16 @@ public class Database {
                 config.setPoolName("H2Pool");
                 config.setMaximumPoolSize(5);
                 config.setConnectionInitSql("SELECT 1");
-                System.out.println("Используется H2 (In-Memory Database): " + jdbcUrl);
-            } else {
-                config.setJdbcUrl(jdbcUrl);
-                config.setUsername(dbUser);
-                config.setPassword(dbPass);
-                config.setDriverClassName("org.postgresql.Driver");
-                config.setMaximumPoolSize(10);
-                config.setMinimumIdle(2);
-                System.out.println("Используется PostgreSQL: " + jdbcUrl);
-            }
+                System.out.println("Используется H2 (In-Memory Database): " + jdbcUrl);*/
+            //  } else {
+            config.setJdbcUrl(jdbcUrl);
+            config.setUsername(dbUser);
+            config.setPassword(dbPass);
+            config.setDriverClassName("org.postgresql.Driver");
+            config.setMaximumPoolSize(10);
+            config.setMinimumIdle(2);
+            System.out.println("Используется PostgreSQL: " + jdbcUrl);
+            // }
         }
 
 
