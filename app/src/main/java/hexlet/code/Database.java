@@ -67,16 +67,30 @@ public class Database {
         } else {
 
             if (dbUser.isEmpty() || dbPass.isEmpty()) {
-                throw new IllegalStateException("Отсутствуют учетные данные для PostgreSQL! "
-                        + "Добавьте DB_USERNAME и DB_PASSWORD.");
+                /*throw new IllegalStateException("Отсутствуют учетные данные
+                 для PostgreSQL! "
+                        + "Добавьте DB_USERNAME и DB_PASSWORD.");*/
+                jdbcUrl = "jdbc:h2:mem:project;MODE=PostgreSQL;DB_CLOSE_DELAY=-1";
+
+                config.setJdbcUrl(jdbcUrl);
+
+                config.setUsername("");
+                config.setPassword("");
+
+                config.setDriverClassName("org.h2.Driver");
+                config.setPoolName("H2Pool");
+                config.setMaximumPoolSize(5);
+                config.setConnectionInitSql("SELECT 1");
+                System.out.println("Используется H2 (In-Memory Database): " + jdbcUrl);
+            } else {
+                config.setJdbcUrl(jdbcUrl);
+                config.setUsername(dbUser);
+                config.setPassword(dbPass);
+                config.setDriverClassName("org.postgresql.Driver");
+                config.setMaximumPoolSize(10);
+                config.setMinimumIdle(2);
+                System.out.println("Используется PostgreSQL: " + jdbcUrl);
             }
-            config.setJdbcUrl(jdbcUrl);
-            config.setUsername(dbUser);
-            config.setPassword(dbPass);
-            config.setDriverClassName("org.postgresql.Driver");
-            config.setMaximumPoolSize(10);
-            config.setMinimumIdle(2);
-            System.out.println("Используется PostgreSQL: " + jdbcUrl);
         }
 
 
