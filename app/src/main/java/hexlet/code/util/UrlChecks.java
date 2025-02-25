@@ -12,32 +12,47 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
 
-public class UrlChecks {
+/**
+ * Утилитный класс для проверки URL.
+ * Не предназначен для наследования.
+ */
+public final class UrlChecks {
     private MockWebServer mockWebServer;
     private String mockBaseUrl;
 
+    private UrlChecks() {
+        // Закрытый конструктор, чтобы нельзя было унаследовать и вызвать.
+    }
+
+    /**
+     * Точка входа для отладки (пример использования).
+     *
+     * @param args Аргументы командной строки
+     */
     public static void main(String[] args) {
         UrlChecks app = new UrlChecks();
         app.startMockServer();
         app.sendRequestToMockServer();
     }
 
+    /**
+     * Запуск MockWebServer с заготовленным ответом.
+     */
     public void startMockServer() {
         try {
             mockWebServer = new MockWebServer();
             mockWebServer.start();
 
-            // Готовый ответ
             mockWebServer.enqueue(new MockResponse()
                     .setResponseCode(200)
                     .setBody("""
-                                <html>
-                                    <head><title>Mock Page</title></head>
-                                    <body>
-                                        <h1>Hello from Mock Server</h1>
-                                    </body>
-                                </html>
-                            """)
+                    <html>
+                        <head><title>Mock Page</title></head>
+                        <body>
+                            <h1>Hello from Mock Server</h1>
+                        </body>
+                    </html>
+                    """)
             );
 
             mockBaseUrl = mockWebServer.url("/").toString();
@@ -48,22 +63,24 @@ public class UrlChecks {
         }
     }
 
+    /**
+     * Отправка запроса на mock-сервер и вывод ответа.
+     */
     public void sendRequestToMockServer() {
-        // Отправляем запрос через Unirest на наш mock-сервер
-        HttpResponse<String> response = Unirest.get(mockBaseUrl)
-                .asString();
+        HttpResponse<String> response = Unirest.get(mockBaseUrl).asString();
 
-        // Разбираем ответ
         System.out.println("Status code: " + response.getStatus());
         System.out.println("Response body:\n" + response.getBody());
 
-        // Парсим HTML
         String title = response.getBody().split("<title>")[1].split("</title>")[0];
         System.out.println("Page title: " + title);
 
         shutdownMockServer();
     }
 
+    /**
+     * Остановка mock-сервера.
+     */
     public void shutdownMockServer() {
         try {
             mockWebServer.shutdown();
@@ -73,11 +90,17 @@ public class UrlChecks {
         }
     }
 
+    /**
+     * Основная проверка реального URL.
+     *
+     * @param url строковое представление URL
+     * @return результат проверки (UrlCheck) с title/h1/description
+     */
     public static UrlCheck check(String url) {
         try {
             URL parsed = new URL(url);
             String host = parsed.getHost();
-            if (host.equalsIgnoreCase("localhost")) {
+            if ("localhost".equalsIgnoreCase(host)) {
                 int port = parsed.getPort();
                 String protocol = parsed.getProtocol();
                 String file = parsed.getFile();
@@ -95,15 +118,14 @@ public class UrlChecks {
 
             int statusCode = 200;
             String title = doc.title();
-            String h1 = doc.selectFirst("h1") != null
+            String h1 = (doc.selectFirst("h1") != null)
                     ? doc.selectFirst("h1").text()
                     : null;
-            String description = doc.selectFirst("meta[name=description]") != null
+            String description = (doc.selectFirst("meta[name=description]") != null)
                     ? doc.selectFirst("meta[name=description]").attr("content")
                     : null;
 
             UrlCheck check = new UrlCheck(statusCode, title, h1, description);
-            // Положим дату создания, чтобы при сохранении в url_checks всё было корректно
             check.setCreatedAt(LocalDateTime.now());
             return check;
 

@@ -13,12 +13,26 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Репозиторий для работы с таблицей url_checks.
+ * Класс не предназначен для наследования.
+ */
 public class UrlCheckRepository extends BaseRepository {
+
+    /**
+     * Конструктор.
+     *
+     * @param dataSource источник данных
+     */
     public UrlCheckRepository(DataSource dataSource) {
         super(dataSource);
     }
 
-    public void createTable() {
+    /**
+     * Создаёт таблицу url_checks, если она не существует.
+     * Не предназначен для переопределения.
+     */
+    public final void createTable() {
         String sql = """
                 CREATE TABLE IF NOT EXISTS url_checks (
                 id BIGSERIAL PRIMARY KEY,

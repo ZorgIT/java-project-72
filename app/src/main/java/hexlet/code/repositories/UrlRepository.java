@@ -14,13 +14,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Репозиторий для работы с таблицей urls.
+ * Класс не предназначен для наследования.
+ */
 public class UrlRepository extends BaseRepository {
 
+    /**
+     * Конструктор.
+     *
+     * @param dataSource источник данных
+     */
     public UrlRepository(DataSource dataSource) {
         super(dataSource);
     }
 
-    public void createTable() {
+    /**
+     * Создаёт таблицу urls, если она не существует.
+     * Не предназначен для переопределения.
+     */
+    public final void createTable() {
         String sql = """
                 CREATE TABLE IF NOT EXISTS urls (
                     id BIGSERIAL PRIMARY KEY,

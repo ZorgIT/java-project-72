@@ -3,8 +3,8 @@ package hexlet.code;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import hexlet.code.models.Url;
-import hexlet.code.repositories.UrlRepository;
 import hexlet.code.repositories.UrlCheckRepository;
+import hexlet.code.repositories.UrlRepository;
 import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
 import org.junit.jupiter.api.AfterEach;
@@ -16,16 +16,24 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class AppTest {
+/**
+ * Основной класс для тестирования приложения App.
+ * Не предполагается наследование.
+ */
+public final class AppTest {
     private Javalin app;
     private Connection connection;
 
+    /**
+     * Инициализация перед каждым тестом.
+     *
+     * @throws IOException  при ошибках ввода-вывода
+     * @throws SQLException при ошибке SQL
+     */
     @BeforeEach
     public void setUp() throws IOException, SQLException {
-
         app = App.getApp();
 
-        // Инициализируем подключение только внутри теста
         connection = Database.getDataSource().getConnection();
         try (Statement stmt = connection.createStatement()) {
             stmt.execute("""
@@ -54,12 +62,16 @@ public class AppTest {
         UrlCheckRepository.removeAll();
     }
 
+    /**
+     * Освобождает ресурсы после каждого теста.
+     *
+     * @throws SQLException при ошибке SQL
+     */
     @AfterEach
     public void tearDown() throws SQLException {
-        // Закрываем соединение после тестов
         if (connection != null) {
-            try (Connection connection = Database.getDataSource().getConnection();
-                 Statement stmt = connection.createStatement()) {
+            try (Connection connection2 = Database.getDataSource().getConnection();
+                 Statement stmt = connection2.createStatement()) {
                 stmt.execute("DROP TABLE IF EXISTS url_checks");
                 stmt.execute("DROP TABLE IF EXISTS urls");
             }
@@ -94,7 +106,6 @@ public class AppTest {
             assertThat(response.code()).isEqualTo(200);
             assertThat(response.body().string()).contains("https://example.com");
 
-            // Проверяем, что URL добавился в БД
             var urls = UrlRepository.findAll();
             assertThat(urls).hasSize(1);
             assertThat(urls.get(0).getName()).isEqualTo("https://example.com");
