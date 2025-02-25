@@ -7,11 +7,13 @@ import io.github.cdimascio.dotenv.Dotenv;
 import javax.sql.DataSource;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.StringUtils.firstNonEmpty;
+
 public class Database {
     private static final HikariDataSource DATA_SOURCE;
 
     static {
-
+/*
         String envValue = Optional.ofNullable(System.getenv("env"))
                 .orElse(System.getProperty("env", ""))
                 .toLowerCase();
@@ -42,7 +44,60 @@ public class Database {
 
         String jdbcUrl = firstNonEmpty(jdbcUrlFromProp, jdbcUrlFromEnv, jdbcUrlFromDotenv);
         String dbUser = firstNonEmpty(userFromProp, userFromEnv, userFromDotenv);
+        String dbPass = firstNonEmpty(passFromProp, passFromEnv,
+        passFromDotenv);*/
+
+        // Вставляем отладочные принты:
+        System.out.println("==== DEBUG: Database init ====");
+        // envValue
+        String envValue = Optional.ofNullable(System.getenv("env"))
+                .orElse(System.getProperty("env", ""))
+                .toLowerCase();
+        System.out.println("envValue = " + envValue);
+
+        boolean isTest = "test".equals(envValue);
+        System.out.println("isTest = " + isTest);
+
+        Dotenv dotenv = Dotenv.configure()
+                .directory(isTest ? "src/test/resources" : ".")
+                .ignoreIfMissing()
+                .load();
+
+        // собираем jdbcUrl
+        String jdbcUrlFromProp = System.getProperty("JDBC_DATABASE_URL");
+        String jdbcUrlFromEnv = System.getenv("JDBC_DATABASE_URL");
+        String jdbcUrlFromDotenv = dotenv.get("JDBC_DATABASE_URL", "");
+
+        // Распечатываем
+        System.out.println("jdbcUrlFromProp = " + jdbcUrlFromProp);
+        System.out.println("jdbcUrlFromEnv = " + jdbcUrlFromEnv);
+        System.out.println("jdbcUrlFromDotenv = " + jdbcUrlFromDotenv);
+
+        // Аналогично для user и pass
+        String userFromProp = System.getProperty("DB_USERNAME");
+        String userFromEnv = System.getenv("DB_USERNAME");
+        String userFromDotenv = dotenv.get("DB_USERNAME", "");
+        System.out.println("userFromProp = " + userFromProp);
+        System.out.println("userFromEnv = " + userFromEnv);
+        System.out.println("userFromDotenv = " + userFromDotenv);
+
+        String passFromProp = System.getProperty("DB_PASSWORD");
+        String passFromEnv = System.getenv("DB_PASSWORD");
+        String passFromDotenv = dotenv.get("DB_PASSWORD", "");
+        System.out.println("passFromProp = " + passFromProp);
+        System.out.println("passFromEnv = " + passFromEnv);
+        System.out.println("passFromDotenv = " + passFromDotenv);
+
+        // Теперь собираем final варианты
+        String jdbcUrl = firstNonEmpty(jdbcUrlFromProp, jdbcUrlFromEnv, jdbcUrlFromDotenv);
+        String dbUser = firstNonEmpty(userFromProp, userFromEnv, userFromDotenv);
         String dbPass = firstNonEmpty(passFromProp, passFromEnv, passFromDotenv);
+
+        // Выводим итог:
+        System.out.println("==== FINAL CHOICES BEFORE USE ====");
+        System.out.println("jdbcUrl = " + jdbcUrl);
+        System.out.println("dbUser = " + dbUser);
+        System.out.println("dbPass = " + dbPass);
 
 
         HikariConfig config = new HikariConfig();
