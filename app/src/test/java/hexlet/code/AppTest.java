@@ -28,21 +28,26 @@ public class AppTest {
         // Инициализируем подключение только внутри теста
         connection = Database.getDataSource().getConnection();
         try (Statement stmt = connection.createStatement()) {
-            stmt.execute("CREATE TABLE IF NOT EXISTS urls("
-                    + "id BIGSERIAL PRIMARY KEY, "
-                    + "name VARCHAR(255) NOT NULL UNIQUE, "
-                    + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
-                    + "checked_at DATE DEFAULT NULL,"
-                    + "response_code VARCHAR(255) NULL UNIQUE)");
+            stmt.execute("""
+                    CREATE TABLE IF NOT EXISTS urls (
+                        id BIGSERIAL PRIMARY KEY,
+                        name VARCHAR(255) NOT NULL UNIQUE,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        checked_at TIMESTAMP,
+                        response_code VARCHAR(255)
+                    )
+                    """);
 
-            stmt.execute("CREATE TABLE IF NOT EXISTS url_checks ("
-                    + "id BIGSERIAL PRIMARY KEY, "
-                    + "url_id BIGINT REFERENCES urls(id), "
-                    + "status_code INT, "
-                    + "title VARCHAR(255), "
-                    + "h1 VARCHAR(255), "
-                    + "description TEXT, "
-                    + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+            stmt.execute("""
+                    CREATE TABLE IF NOT EXISTS url_checks (
+                    id BIGSERIAL PRIMARY KEY,
+                    url_id BIGINT REFERENCES urls(id),
+                    status_code INT,
+                    title TEXT,
+                    h1 TEXT,
+                    description TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
+                    """);
         }
 
         UrlRepository.removeAll();

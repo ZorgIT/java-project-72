@@ -19,14 +19,16 @@ public class UrlCheckRepository extends BaseRepository {
     }
 
     public void createTable() {
-        String sql = "CREATE TABLE IF NOT EXISTS url_checks ("
-                + "id BIGSERIAL PRIMARY KEY, "
-                + "url_id BIGINT REFERENCES urls(id), "
-                + "status_code INT, "
-                + "title TEXT, "
-                + "h1 TEXT, "
-                + "description TEXT, "
-                + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
+        String sql = """
+                CREATE TABLE IF NOT EXISTS url_checks (
+                id BIGSERIAL PRIMARY KEY,
+                url_id BIGINT REFERENCES urls(id),
+                status_code INT,
+                title TEXT,
+                h1 TEXT,
+                description TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
+                """;
 
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
