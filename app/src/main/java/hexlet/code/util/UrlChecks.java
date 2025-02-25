@@ -11,6 +11,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.io.IOException;
+import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public class UrlChecks {
@@ -76,24 +78,40 @@ public class UrlChecks {
 
     public static UrlCheck check(String url) {
         try {
-            HttpResponse<String> response = Unirest.get(url).asString();
-            String body = response.getBody();
+            URL parsed = new URL(url);
+            String host = parsed.getHost();
+            if (host.equalsIgnoreCase("localhost")) {
+                int port = parsed.getPort();
+                String protocol = parsed.getProtocol();
+                String file = parsed.getFile();
+                String newUrl = protocol + "://" + "127.0.0.1";
+                if (port != -1) {
+                    newUrl += ":" + port;
+                }
+                if (!file.isEmpty()) {
+                    newUrl += file;
+                }
+                url = newUrl;
+            }
 
-            Document doc = Jsoup.parse(body);
+            Document doc = Jsoup.connect(url).get();
+
+            int statusCode = 200;
             String title = doc.title();
-            String h1 = Optional.ofNullable(doc.selectFirst("h1")).map(Element::text).orElse("");
-            String description = Optional.ofNullable(doc.selectFirst("meta[name=description]"))
-                    .map(e -> e.attr("content"))
-                    .orElse("");
+            String h1 = doc.selectFirst("h1") != null
+                    ? doc.selectFirst("h1").text()
+                    : null;
+            String description = doc.selectFirst("meta[name=description]") != null
+                    ? doc.selectFirst("meta[name=description]").attr("content")
+                    : null;
 
-            return new UrlCheck(
-                    response.getStatus(),
-                    title,
-                    h1,
-                    description
-            );
-        } catch (UnirestException e) {
-            throw new RuntimeException(e);
+            UrlCheck check = new UrlCheck(statusCode, title, h1, description);
+            // Положим дату создания, чтобы при сохранении в url_checks всё было корректно
+            check.setCreatedAt(LocalDateTime.now());
+            return check;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при проверке URL: " + url, e);
         }
     }
 }
