@@ -19,6 +19,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URI;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -105,9 +106,15 @@ public class UrlController {
                 .orElseThrow(() -> new NotFoundResponse("URL not found"));
 
         try {
+            // Делаем реальную проверку
             UrlCheck check = UrlChecks.check(url.getName());
             check.setUrlId(urlId);
             UrlCheckRepository.save(check);
+
+            url.setLastCheck(LocalDateTime.now());
+            url.setResponseCode(String.valueOf(check.getStatusCode()));
+            UrlRepository.update(url);
+
             ctx.sessionAttribute("flash", "Проверка выполнена успешно");
             ctx.sessionAttribute("flashType", "success");
 

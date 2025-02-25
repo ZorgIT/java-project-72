@@ -23,54 +23,57 @@ repositories {
 }
 
 dependencies {
-    //environment
+    // environment
     implementation("io.github.cdimascio:java-dotenv:5.2.2")
-    //db
+
+    // db
     implementation("com.h2database:h2:2.2.224")
     implementation("org.postgresql:postgresql:42.5.0")
     implementation("com.zaxxer:HikariCP:5.1.0")
-    //web
+
+    // web
     implementation("com.fasterxml.jackson.core:jackson-databind:2.16.1")
     implementation("org.apache.commons:commons-text:1.11.0")
     implementation("gg.jte:jte:3.1.9")
-    //parsing html
+
+    // parsing html
     implementation("org.jsoup:jsoup:1.18.3")
-    //Mock web
+
+    // Mock web
     implementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     implementation("com.konghq:unirest-java-core:4.4.5")
-    //implementation("org.slf4j:slf4j-simple:2.0.9")
+
+    // logging
     implementation("ch.qos.logback:logback-classic:1.5.6")
+
+    // javalin
     implementation("io.javalin:javalin:6.1.3")
     implementation("io.javalin:javalin-bundle:6.1.3")
     implementation("io.javalin:javalin-rendering:6.1.3")
-    //tests
+
+    // tests
     testImplementation("org.assertj:assertj-core:3.25.3")
     testImplementation(platform("org.junit:junit-bom:5.10.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
-// Конфигурация Jacoco
+// Настройка Jacoco
 jacoco {
     toolVersion = "0.8.11"
     reportsDirectory.set(layout.buildDirectory.dir("reports/jacoco"))
 }
 
-// Настройка задачи генерации отчёта Jacoco
+// Задача генерации отчёта
 tasks.withType<JacocoReport> {
-    dependsOn(tasks.test)  // Зависимость от задачи test
+    dependsOn(tasks.test)
     reports {
         xml.required.set(true)
         html.required.set(true)
     }
-
     classDirectories.setFrom(
         files(classDirectories.files.map {
             fileTree(it) {
-                exclude(
-                    "**/*Test.class",
-                    //"**/Main.class" Пример: исключение главного класса,
-                    // если нужно
-                )
+                exclude("**/*Test.class")
             }
         })
     )
@@ -79,11 +82,14 @@ tasks.withType<JacocoReport> {
 
 // Настройка задачи test
 tasks.withType<Test> {
-    systemProperty("env", "test")
+    environment("env", "test")
+    environment("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;MODE=PostgreSQL")
 
-    systemProperty("JDBC_DATABASE_URL", "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL")
-    systemProperty("DB_USERNAME", "sa")
-    systemProperty("DB_PASSWORD", "")
+    // Если хотите, чтобы код не жаловался на PG при тестах, можно вообще не задавать
+    // DB_USERNAME/DB_PASSWORD. Но если ваш Database.java проверяет их (даже для H2),
+    // можно прописать:
+    environment("DB_USERNAME", "")
+    environment("DB_PASSWORD", "")
 
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)

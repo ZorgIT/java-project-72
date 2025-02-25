@@ -28,11 +28,11 @@ content = @`
                             <td><a href="/urls/${url.getId()}">${url.getName()}</a></td>
                             <td>
                                 @if(url.getLastCheck() != null)
-                                    ${url.getCreatedAt().toString()}
+                                    ${url.getLastCheck().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}
                                 @endif
                             </td>
                             <td>
-                                @if(url.getLastCheck() != null)
+                                @if(url.getResponseCode() != null)
                                     ${url.getResponseCode()}
                                 @endif
                             </td>

@@ -22,10 +22,6 @@ public class AppTest {
 
     @BeforeEach
     public void setUp() throws IOException, SQLException {
-        // Устанавливаем тестовые учетные данные для базы
-        System.setProperty("DB_USERNAME", "test_user");
-        System.setProperty("DB_PASSWORD", "test_password");
-        System.setProperty("DB_URL", "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;");
 
         app = App.getApp();
 
@@ -43,8 +39,8 @@ public class AppTest {
                     + "id BIGSERIAL PRIMARY KEY, "
                     + "url_id BIGINT REFERENCES urls(id), "
                     + "status_code INT, "
-                    + "title TEXT, "
-                    + "h1 TEXT, "
+                    + "title VARCHAR(255), "
+                    + "h1 VARCHAR(255), "
                     + "description TEXT, "
                     + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
         }
@@ -57,6 +53,11 @@ public class AppTest {
     public void tearDown() throws SQLException {
         // Закрываем соединение после тестов
         if (connection != null) {
+            try (Connection connection = Database.getDataSource().getConnection();
+                 Statement stmt = connection.createStatement()) {
+                stmt.execute("DROP TABLE IF EXISTS url_checks");
+                stmt.execute("DROP TABLE IF EXISTS urls");
+            }
             connection.close();
         }
         app.stop();

@@ -3,13 +3,7 @@ package hexlet.code.repositories;
 import hexlet.code.models.Url;
 
 import javax.sql.DataSource;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,16 +16,18 @@ public class UrlRepository extends BaseRepository {
     }
 
     public void createTable() {
+        String sql = """
+                CREATE TABLE IF NOT EXISTS urls (
+                    id BIGSERIAL PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL UNIQUE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    checked_at TIMESTAMP,
+                    response_code VARCHAR(255)
+                )
+                """;
         try (Connection connection = getConnection();
-             PreparedStatement stmt = connection.prepareStatement(
-                     "CREATE TABLE IF NOT EXISTS urls ("
-                             + "id BIGSERIAL PRIMARY KEY, "
-                             + "name VARCHAR(255) NOT NULL UNIQUE, "
-                             + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
-                             + "checked_at DATE DEFAULT NULL,"
-                             + "response_code VARCHAR(255) NULL UNIQUE)"
-             )) {
-            stmt.executeUpdate();
+             Statement stmt = connection.createStatement()) {
+            stmt.executeUpdate(sql);
         } catch (SQLException e) {
             throw new RuntimeException("Ошибка создания таблицы urls", e);
         }
@@ -39,21 +35,18 @@ public class UrlRepository extends BaseRepository {
 
     public static void save(Url url) {
         try (Connection connection = getConnection()) {
-            // Проверка на уникальность добавляемого URL
+            // Проверка, нет ли уже такого URL
             try (PreparedStatement checkStmt = connection.prepareStatement(
-                    "SELECT id FROM urls WHERE name = ?"
-            )) {
+                    "SELECT id FROM urls WHERE name = ?")) {
                 checkStmt.setString(1, url.getName());
                 try (ResultSet rs = checkStmt.executeQuery()) {
                     if (rs.next()) {
-                        // Если URL уже существует, устанавливаем его id и выходим из метода
                         url.setId(rs.getLong("id"));
-                        return;
+                        return; // уже есть, просто возвращаем с установленным id
                     }
                 }
             }
 
-            // Если URL не найден, выполняем вставку
             try (PreparedStatement stmt = connection.prepareStatement(
                     "INSERT INTO urls (name, created_at) VALUES (?, ?)",
                     Statement.RETURN_GENERATED_KEYS
@@ -62,7 +55,6 @@ public class UrlRepository extends BaseRepository {
                 stmt.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
                 stmt.executeUpdate();
 
-                // Получаем сгенерированный идентификатор
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         url.setId(generatedKeys.getLong(1));
@@ -74,56 +66,137 @@ public class UrlRepository extends BaseRepository {
         }
     }
 
+
     public static List<Url> findAll() {
+        String sql = """
+                SELECT
+                    u.id               AS url_id,
+                    u.name             AS url_name,
+                    u.created_at       AS url_created_at,
+                    c.created_at       AS check_created_at,
+                    c.status_code      AS check_status_code
+                FROM urls u
+                LEFT JOIN url_checks c
+                    ON c.url_id = u.id
+                   AND c.created_at = (
+                       SELECT MAX(created_at)
+                       FROM url_checks cc
+                       WHERE cc.url_id = u.id
+                   )
+                ORDER BY u.id
+                """;
+
         List<Url> urls = new ArrayList<>();
+
         try (Connection connection = getConnection();
-             PreparedStatement stmt = connection.prepareStatement("SELECT * FROM urls")) {
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                Url url = new Url(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getTimestamp("created_at").toLocalDateTime()
+                long id = rs.getLong("url_id");
+                String name = rs.getString("url_name");
+                Timestamp createdAtTs = rs.getTimestamp("url_created_at");
+
+                Url url = new Url(id, name,
+                        createdAtTs == null ? null : createdAtTs.toLocalDateTime()
                 );
+
+                Timestamp checkCreatedAt = rs.getTimestamp("check_created_at");
+                if (checkCreatedAt != null) {
+                    url.setLastCheck(checkCreatedAt.toLocalDateTime());
+                }
+                int status = rs.getInt("check_status_code");
+
+                if (!rs.wasNull()) {
+                    url.setResponseCode(String.valueOf(status));
+                }
+
                 urls.add(url);
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Ошибка получения списка URL", e);
+            throw new RuntimeException("Ошибка получения списка URL (с последней проверкой)", e);
         }
+
         return urls;
     }
+
     public static Optional<Url> findById(Long id) {
-        String sql = "SELECT * FROM urls WHERE id = ?";
+        String sql = """
+                SELECT
+                    u.id               AS url_id,
+                    u.name             AS url_name,
+                    u.created_at       AS url_created_at,
+                    c.created_at       AS check_created_at,
+                    c.status_code      AS check_status_code
+                FROM urls u
+                LEFT JOIN url_checks c
+                    ON c.url_id = u.id
+                   AND c.created_at = (
+                       SELECT MAX(created_at)
+                       FROM url_checks cc
+                       WHERE cc.url_id = u.id
+                   )
+                WHERE u.id = ?
+                """;
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setLong(1, id);
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    return Optional.empty();
+                }
 
-            if (rs.next()) {
-                Url url = new Url(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getTimestamp("created_at").toLocalDateTime()
+                String name = rs.getString("url_name");
+                Timestamp createdAtTs = rs.getTimestamp("url_created_at");
+
+                Url url = new Url(id, name,
+                        createdAtTs == null ? null : createdAtTs.toLocalDateTime()
                 );
+
+                Timestamp checkCreatedAt = rs.getTimestamp("check_created_at");
+                if (checkCreatedAt != null) {
+                    url.setLastCheck(checkCreatedAt.toLocalDateTime());
+                }
+                int status = rs.getInt("check_status_code");
+                if (!rs.wasNull()) {
+                    url.setResponseCode(String.valueOf(status));
+                }
+
                 return Optional.of(url);
             }
-            return Optional.empty();
+
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Ошибка при получении Url по id", e);
+        }
+    }
+
+    public static void update(Url url) {
+        String sql = "UPDATE urls SET checked_at = ?, response_code = ? WHERE id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            if (url.getLastCheck() == null) {
+                stmt.setTimestamp(1, null);
+            } else {
+                stmt.setTimestamp(1, Timestamp.valueOf(url.getLastCheck()));
+            }
+            stmt.setString(2, url.getResponseCode());
+            stmt.setLong(3, url.getId());
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Ошибка при обновлении Url", e);
         }
     }
 
     public static void removeAll() throws SQLException {
         try (Connection connection = getConnection();
              Statement stmt = connection.createStatement()) {
-            // Delete all checks first to respect foreign key constraints
             stmt.execute("DELETE FROM url_checks");
-            // Delete all URLs
             stmt.execute("DELETE FROM urls");
         } catch (SQLException e) {
-            // Ignore if tables don't exist yet
             if (!e.getMessage().contains("Table \"URLS\" not found")) {
                 throw e;
             }

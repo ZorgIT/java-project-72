@@ -11,55 +11,74 @@ public class Database {
     private static final HikariDataSource DATA_SOURCE;
 
     static {
-        // Определяем, тестовая среда или нет
-        boolean isTest = "test".equals(System.getProperty("env"));
 
-        // Загружаем переменные из .env (если есть)
+        String envValue = Optional.ofNullable(System.getenv("env"))
+                .orElse(System.getProperty("env", ""))
+                .toLowerCase();
+
+        boolean isTest = "test".equals(envValue);
+
+
         Dotenv dotenv = Dotenv.configure()
                 .directory(isTest ? "src/test/resources" : ".")
                 .ignoreIfMissing()
                 .load();
 
+
+        String jdbcUrlFromProp = System.getProperty("JDBC_DATABASE_URL");
+        String jdbcUrlFromEnv = System.getenv("JDBC_DATABASE_URL");
+        String jdbcUrlFromDotenv = dotenv.get("JDBC_DATABASE_URL", "");
+
+
+        String userFromProp = System.getProperty("DB_USERNAME");
+        String userFromEnv = System.getenv("DB_USERNAME");
+        String userFromDotenv = dotenv.get("DB_USERNAME", "");
+
+
+        String passFromProp = System.getProperty("DB_PASSWORD");
+        String passFromEnv = System.getenv("DB_PASSWORD");
+        String passFromDotenv = dotenv.get("DB_PASSWORD", "");
+
+
+        String jdbcUrl = firstNonEmpty(jdbcUrlFromProp, jdbcUrlFromEnv, jdbcUrlFromDotenv);
+        String dbUser = firstNonEmpty(userFromProp, userFromEnv, userFromDotenv);
+        String dbPass = firstNonEmpty(passFromProp, passFromEnv, passFromDotenv);
+
+
         HikariConfig config = new HikariConfig();
 
-        // Определяем URL базы данных
-        String jdbcUrl = Optional.ofNullable(System.getenv("JDBC_DATABASE_URL"))
-                .orElse(dotenv.get("JDBC_DATABASE_URL", ""));
-
-        // Если БД явно не указана, используем H2
-        boolean useH2 = isTest || jdbcUrl.isEmpty();
+        boolean urlLooksLikeH2 = jdbcUrl.toLowerCase().startsWith("jdbc:h2:");
+        boolean useH2 = isTest || jdbcUrl.isEmpty() || urlLooksLikeH2;
 
         if (useH2) {
-            jdbcUrl = "jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1";
+
+            jdbcUrl = "jdbc:h2:mem:project;MODE=PostgreSQL;DB_CLOSE_DELAY=-1";
+
             config.setJdbcUrl(jdbcUrl);
-            config.setUsername("sa");
-            config.setPassword("sa");
+
+            config.setUsername("");
+            config.setPassword("");
+
             config.setDriverClassName("org.h2.Driver");
             config.setPoolName("H2Pool");
             config.setMaximumPoolSize(5);
             config.setConnectionInitSql("SELECT 1");
-            System.out.println("Используется H2 (In-Memory Database) для тестов.");
+            System.out.println("Используется H2 (In-Memory Database): " + jdbcUrl);
         } else {
-            // Используем PostgreSQL
-            String username = Optional.ofNullable(System.getenv("DB_USERNAME"))
-                    .orElse(dotenv.get("DB_USERNAME", ""));
-            String password = Optional.ofNullable(System.getenv("DB_PASSWORD"))
-                    .orElse(dotenv.get("DB_PASSWORD", ""));
 
-            // Проверяем, заданы ли все переменные для PostgreSQL
-            if (username.isEmpty() || password.isEmpty()) {
+            if (dbUser.isEmpty() || dbPass.isEmpty()) {
                 throw new IllegalStateException("Отсутствуют учетные данные для PostgreSQL! "
                         + "Добавьте DB_USERNAME и DB_PASSWORD.");
             }
-
             config.setJdbcUrl(jdbcUrl);
-            config.setUsername(username);
-            config.setPassword(password);
+            config.setUsername(dbUser);
+            config.setPassword(dbPass);
             config.setDriverClassName("org.postgresql.Driver");
             config.setMaximumPoolSize(10);
             config.setMinimumIdle(2);
             System.out.println("Используется PostgreSQL: " + jdbcUrl);
         }
+
 
         DATA_SOURCE = new HikariDataSource(config);
     }
@@ -72,5 +91,15 @@ public class Database {
         if (DATA_SOURCE != null && !DATA_SOURCE.isClosed()) {
             DATA_SOURCE.close();
         }
+    }
+
+
+    private static String firstNonEmpty(String... variants) {
+        for (String v : variants) {
+            if (v != null && !v.isEmpty()) {
+                return v;
+            }
+        }
+        return "";
     }
 }
