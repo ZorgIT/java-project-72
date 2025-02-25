@@ -1,34 +1,47 @@
 .DEFAULT_GOAL := build-run
-.PHONY: build setup clean install run run-dist test lint check-deps report
+.PHONY: build setup clean install run run-dist test lint check-deps report check-gradle-version
 
-setup:
-	cd app && chmod +x ./gradlew && ./gradlew wrapper --gradle-version 8.8
+# Настройки
+GRADLE_CMD := ./app/gradlew
+APP_DIR := app
+REQUIRED_GRADLE_VERSION := 8.8
 
-clean:
-	cd app && chmod +x ./gradlew && ./gradlew clean
+# Проверка версии Gradle
+check-gradle-version:
+	@if ! grep -q "gradle-${REQUIRED_GRADLE_VERSION}" ${APP_DIR}/gradle/wrapper/gradle-wrapper.properties; then \
+		echo "ERROR: Gradle version must be ${REQUIRED_GRADLE_VERSION}. Run 'make setup' to fix."; \
+		exit 1; \
+	fi
 
-build:
-	cd app && chmod +x ./gradlew && ./gradlew clean build --stacktrace
+# Цели с зависимостью от проверки версии
+setup: check-gradle-version
+	${GRADLE_CMD} wrapper --gradle-version ${REQUIRED_GRADLE_VERSION}
 
-install:
-	cd app && chmod +x ./gradlew && ./gradlew clean installDist
+clean: check-gradle-version
+	${GRADLE_CMD} clean
 
-run-dist:
-	cd app && chmod +x ./gradlew && ./build/install/app/bin/app
+build: check-gradle-version
+	${GRADLE_CMD} clean build --stacktrace
 
-run:
-	cd app && chmod +x ./gradlew && ./gradlew run
+install: check-gradle-version
+	${GRADLE_CMD} clean installShadowDist
 
-test:
-	cd app && chmod +x ./gradlew && ./gradlew jacocoTestReport
+run-dist: check-gradle-version
+	${APP_DIR}/build/install/app/bin/app
 
-lint:
-	cd app && chmod +x ./gradlew && ./gradlew checkstyleMain
+run: check-gradle-version
+	${GRADLE_CMD} run
 
-check-deps:
-	cd app && chmod +x ./gradlew && ./gradlew dependencyUpdates -Drevision=release
+test: check-gradle-version
+	${GRADLE_CMD} jacocoTestReport
 
-report:
-	cd app && chmod +x ./gradlew && ./gradlew jacocoTestReport
+lint: check-gradle-version
+	${GRADLE_CMD} checkstyleMain
+
+check-deps: check-gradle-version
+	${GRADLE_CMD} dependencyUpdates -Drevision=release
+
+report: check-gradle-version
+	${GRADLE_CMD} jacocoTestReport
 
 build-run: build run
