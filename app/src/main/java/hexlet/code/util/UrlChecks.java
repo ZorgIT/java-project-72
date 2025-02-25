@@ -3,17 +3,14 @@ package hexlet.code.util;
 import hexlet.code.dto.UrlCheck;
 import kong.unirest.core.HttpResponse;
 import kong.unirest.core.Unirest;
-import kong.unirest.core.UnirestException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 public class UrlChecks {
     private MockWebServer mockWebServer;
