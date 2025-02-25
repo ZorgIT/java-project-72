@@ -85,9 +85,6 @@ tasks.withType<Test> {
     environment("env", "test")
     environment("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;MODE=PostgreSQL")
 
-    // Если хотите, чтобы код не жаловался на PG при тестах, можно вообще не задавать
-    // DB_USERNAME/DB_PASSWORD. Но если ваш Database.java проверяет их (даже для H2),
-    // можно прописать:
     environment("DB_USERNAME", "")
     environment("DB_PASSWORD", "")
 
