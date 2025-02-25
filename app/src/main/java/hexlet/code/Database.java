@@ -52,7 +52,7 @@ public class Database {
 
         if (useH2) {
 
-            jdbcUrl = "jdbc:h2:mem:project;MODE=PostgreSQL;DB_CLOSE_DELAY=-1";
+            jdbcUrl = "jdbc:h2:mem:project";
 
             config.setJdbcUrl(jdbcUrl);
 
@@ -70,7 +70,7 @@ public class Database {
                 /*throw new IllegalStateException("Отсутствуют учетные данные
                  для PostgreSQL! "
                         + "Добавьте DB_USERNAME и DB_PASSWORD.");*/
-                jdbcUrl = "jdbc:h2:mem:project;MODE=PostgreSQL;DB_CLOSE_DELAY=-1";
+                jdbcUrl = "jdbc:h2:mem:project";
 
                 config.setJdbcUrl(jdbcUrl);
 
