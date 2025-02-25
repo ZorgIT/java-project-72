@@ -82,11 +82,11 @@ tasks.withType<JacocoReport> {
 
 // Настройка задачи test
 tasks.withType<Test> {
-    environment("env", "test")
-    environment("JDBC_DATABASE_URL", "jdbc:h2:mem:project")
+    //environment("env", "test")
+    //environment("JDBC_DATABASE_URL", "jdbc:h2:mem:project")
 
-    environment("DB_USERNAME", "")
-    environment("DB_PASSWORD", "")
+    //environment("DB_USERNAME", "")
+    //environment("DB_PASSWORD", "")
 
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
