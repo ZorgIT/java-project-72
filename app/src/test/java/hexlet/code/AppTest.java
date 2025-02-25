@@ -46,7 +46,7 @@ public class AppTest {
                     title TEXT,
                     h1 TEXT,
                     description TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
+                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)
                     """);
         }
 

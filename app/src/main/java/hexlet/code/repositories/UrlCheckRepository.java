@@ -27,7 +27,7 @@ public class UrlCheckRepository extends BaseRepository {
                 title TEXT,
                 h1 TEXT,
                 description TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
+                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)
                 """;
 
         try (Connection conn = getConnection();
@@ -39,7 +39,9 @@ public class UrlCheckRepository extends BaseRepository {
     }
 
     public static void save(UrlCheck check) {
-        String sql = "INSERT INTO url_checks (status_code, title, h1, description, url_id) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO url_checks (status_code, title, h1, description, url_id, created_at) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
+
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -49,6 +51,7 @@ public class UrlCheckRepository extends BaseRepository {
             stmt.setString(3, check.getH1());
             stmt.setString(4, check.getDescription());
             stmt.setLong(5, check.getUrlId());
+            stmt.setTimestamp(6, Timestamp.valueOf(check.getCreatedAt()));
             stmt.executeUpdate();
 
             try (ResultSet keys = stmt.getGeneratedKeys()) {
