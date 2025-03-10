@@ -6,5 +6,7 @@
 
 [![Test Coverage](https://api.codeclimate.com/v1/badges/dd876cd391648421219b/test_coverage)](https://codeclimate.com/github/ZorgIT/java-project-72/test_coverage)
 
+Полноценный веб-сайт на базе фреймворка Javalin. Здесь отрабатаны базовые принципы построения современных сайтов на MVC-архитектуре: работа с роутингом, обработчиками запросов и шаблонизатором JTE, взаимодействие с базой данных через JDBC.
+
 ### Deployed app
 https://java-project-72-f3l0.onrender.com/
